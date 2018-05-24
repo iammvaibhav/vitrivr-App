@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">vitrivr App</string>
+    <string name="server_address_hint">Server Address</string>
+    <string name="server_port_hint">Server Port</string>
+    <string name="thumbnails_url_hint">Thumbnails URL</string>
+    <string name="objects_url_hint">Objects URL</string>
+    <string name="save_button_text">Save</string>
+    <string name="select_folder_text">Select Folder</string>
 </resources>
