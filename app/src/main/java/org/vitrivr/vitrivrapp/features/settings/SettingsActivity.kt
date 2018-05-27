@@ -1,8 +1,9 @@
 package org.vitrivr.vitrivrapp.features.settings
 
-import android.content.Context
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
@@ -12,46 +13,40 @@ import kotlinx.android.synthetic.main.settings_activity.*
 import net.rdrei.android.dirchooser.DirectoryChooserActivity
 import net.rdrei.android.dirchooser.DirectoryChooserConfig
 import org.vitrivr.vitrivrapp.R
-import org.vitrivr.vitrivrapp.features.SharedPreferenceHelper
+import org.vitrivr.vitrivrapp.data.model.ResourcesModel
+import org.vitrivr.vitrivrapp.data.model.ServerModel
+import org.vitrivr.vitrivrapp.databinding.SettingsActivityBinding
 
 class SettingsActivity : AppCompatActivity() {
 
     val API_SETTINGS_KEY = "API_SETTINGS"
-    val CINEAST_ADDR_KEY = "CINEAST_ADDR_KEY"
-    val CINEAST_PORT_KEY = "CINEAST_PORT_KEY"
-    val THUMBNAILS_URL_KEY = "THUMBNAILS_URL_KEY"
-    val OBJECTS_URL_KEY = "OBJECTS_URL_KEY"
 
     val THUMBNAILS_PICK_FOLDER_REQUEST_CODE = 1
     val OBJECTS_PICK_FOLDER_REQUEST_CODE = 2
     val THUMBNAILS_WRITE_PERMISSION_REQUEST = 1
     val OBJECTS_WRITE_PERMISSION_REQUEST = 1
 
-    lateinit var spHelper: SharedPreferenceHelper
+    lateinit var settingsViewModel: SettingsViewModel
+    lateinit var binding: SettingsActivityBinding
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.settings_activity)
+        binding = DataBindingUtil.setContentView(this, R.layout.settings_activity)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
-        spHelper = SharedPreferenceHelper(getSharedPreferences(API_SETTINGS_KEY, Context.MODE_PRIVATE))
+        settingsViewModel = ViewModelProviders.of(this, SettingsViewModelFactory(this, API_SETTINGS_KEY)).get(SettingsViewModel::class.java)
+        binding.settingsViewModel = settingsViewModel
 
-        serverAddress.setText(spHelper.getString(CINEAST_ADDR_KEY))
-        if (spHelper.getInt(CINEAST_PORT_KEY) != 0)
-            serverPort.setText(spHelper.getInt(CINEAST_PORT_KEY).toString())
-        thumbnailsURL.setText(spHelper.getString(THUMBNAILS_URL_KEY))
-        objectsURL.setText(spHelper.getString(OBJECTS_URL_KEY))
 
         cineastSettingsSave.setOnClickListener {
-            spHelper.putString(CINEAST_ADDR_KEY, serverAddress.text.toString())
-            spHelper.putInt(CINEAST_PORT_KEY, serverPort.text.toString().toIntOrNull() ?: 0)
+            settingsViewModel.saveServerSettings(ServerModel(serverAddress.text.toString(), serverPort.text.toString().toIntOrNull() ?: 0))
             Toast.makeText(this@SettingsActivity, "Server Settings Saved", Toast.LENGTH_SHORT).show()
         }
 
         resourcesSettingsSave.setOnClickListener {
-            spHelper.putString(THUMBNAILS_URL_KEY, thumbnailsURL.text.toString())
-            spHelper.putString(OBJECTS_URL_KEY, objectsURL.text.toString())
+            settingsViewModel.saveResourcesSettings(ResourcesModel(thumbnailsURL.text.toString(), objectsURL.text.toString()))
             Toast.makeText(this@SettingsActivity, "Resources Settings Saved", Toast.LENGTH_SHORT).show()
         }
 

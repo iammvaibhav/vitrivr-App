@@ -1,217 +1,231 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <data>
+        <variable
+            name="settingsViewModel"
+            type="org.vitrivr.vitrivrapp.features.settings.SettingsViewModel" />
+    </data>
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/colorPrimary">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-            <ImageView
-                android:layout_width="100dp"
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
+                android:background="@color/colorPrimary">
+
+                <ImageView
+                    android:layout_width="100dp"
+                    android:layout_height="?attr/actionBarSize"
+                    android:layout_gravity="center_horizontal"
+                    android:src="@drawable/vitrivr" />
+
+            </android.support.v7.widget.Toolbar>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginBottom="12dp"
+                android:background="@color/headingBackgroundDark">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="12dp"
+                    android:text="Cineast API Settings"
+                    android:textColor="@color/headingColorDark"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </FrameLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp">
+
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/serverAddress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/server_address_hint"
+                    android:text="@{settingsViewModel.getServerSettings().address}"/>
+
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp">
+
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/serverPort"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/server_port_hint"
+                    android:inputType="number"
+                    android:text='@{settingsViewModel.getServerSettings().port == 0 ? "" : String.valueOf(settingsViewModel.getServerSettings().port)}'/>
+
+            </android.support.design.widget.TextInputLayout>
+
+            <Button
+                android:id="@+id/cineastSettingsSave"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:src="@drawable/vitrivr" />
+                android:backgroundTint="@color/colorAccent"
+                android:text="@string/save_button_text"
+                android:textColor="@android:color/white" />
 
-        </android.support.v7.widget.Toolbar>
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="12dp"
+                android:background="@color/headingBackgroundDark">
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="@color/headingBackgroundDark"
-            android:layout_marginBottom="12dp">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="12dp"
+                    android:text="Resources Settings"
+                    android:textColor="@color/headingColorDark"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </FrameLayout>
 
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/headingColorDark"
-                android:text="Cineast API Settings"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="12dp"
+                android:text="Thumbnails"
                 android:textSize="16sp"
-                android:layout_gravity="center_vertical"
-                android:layout_marginLeft="12dp"
-                android:textStyle="bold"/>
-        </FrameLayout>
+                android:textStyle="bold" />
 
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp">
-
-            <android.support.design.widget.TextInputEditText
-                android:id="@+id/serverAddress"
+            <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/server_address_hint"/>
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp">
 
-        </android.support.design.widget.TextInputLayout>
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/thumbnailsURL"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/thumbnails_url_hint"
+                    android:text="@{settingsViewModel.getResourcesSettings().thumbnailsURL}"/>
 
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp">
+            </android.support.design.widget.TextInputLayout>
 
-            <android.support.design.widget.TextInputEditText
-                android:id="@+id/serverPort"
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="number"
-                android:hint="@string/server_port_hint"/>
+                android:layout_marginBottom="5dp">
 
-        </android.support.design.widget.TextInputLayout>
+                <View
+                    android:layout_width="150dp"
+                    android:layout_height="3dp"
+                    android:layout_gravity="center"
+                    android:background="#BDBDBD" />
 
-        <Button
-            android:id="@+id/cineastSettingsSave"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/save_button_text"
-            android:backgroundTint="@color/colorAccent"
-            android:textColor="@android:color/white"
-            android:layout_gravity="center_horizontal"/>
+                <TextView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center_horizontal"
+                    android:background="@drawable/rounded_textview"
+                    android:gravity="center"
+                    android:text="OR"
+                    android:textColor="#575757"
+                    android:textSize="10dp"
+                    android:textStyle="bold" />
+            </FrameLayout>
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_marginTop="12dp"
-            android:background="@color/headingBackgroundDark">
+            <Button
+                android:id="@+id/thumbnailsSelectFolder"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="24dp"
+                android:backgroundTint="@color/colorAccent"
+                android:text="@string/select_folder_text"
+                android:textColor="@android:color/white" />
 
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/headingColorDark"
-                android:text="Resources Settings"
+                android:layout_gravity="center_horizontal"
+                android:text="Objects"
                 android:textSize="16sp"
-                android:layout_gravity="center_vertical"
-                android:layout_marginLeft="12dp"
-                android:textStyle="bold"/>
-        </FrameLayout>
+                android:textStyle="bold" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Thumbnails"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:layout_marginTop="12dp"
-            android:layout_gravity="center_horizontal"/>
-
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp">
-
-            <android.support.design.widget.TextInputEditText
-                android:id="@+id/thumbnailsURL"
+            <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/thumbnails_url_hint"/>
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp">
 
-        </android.support.design.widget.TextInputLayout>
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/objectsURL"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/objects_url_hint"
+                    android:text="@{settingsViewModel.getResourcesSettings().objectsURL}"/>
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp">
-        <View
-            android:layout_width="150dp"
-            android:layout_height="3dp"
-            android:background="#BDBDBD"
-            android:layout_gravity="center"/>
+            </android.support.design.widget.TextInputLayout>
 
-        <TextView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:text="OR"
-            android:textStyle="bold"
-            android:textSize="10dp"
-            android:background="@drawable/rounded_textview"
-            android:textColor="#575757"
-            android:gravity="center"
-            android:layout_gravity="center_horizontal"/>
-        </FrameLayout>
-
-        <Button
-            android:id="@+id/thumbnailsSelectFolder"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/select_folder_text"
-            android:backgroundTint="@color/colorAccent"
-            android:textColor="@android:color/white"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="24dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Objects"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:layout_gravity="center_horizontal"/>
-
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp">
-
-            <android.support.design.widget.TextInputEditText
-                android:id="@+id/objectsURL"
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/objects_url_hint"/>
+                android:layout_marginBottom="5dp">
 
-        </android.support.design.widget.TextInputLayout>
+                <View
+                    android:layout_width="150dp"
+                    android:layout_height="3dp"
+                    android:layout_gravity="center"
+                    android:background="#BDBDBD" />
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp">
-            <View
-                android:layout_width="150dp"
-                android:layout_height="3dp"
-                android:background="#BDBDBD"
-                android:layout_gravity="center"/>
+                <TextView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center_horizontal"
+                    android:background="@drawable/rounded_textview"
+                    android:gravity="center"
+                    android:text="OR"
+                    android:textColor="#575757"
+                    android:textSize="10dp"
+                    android:textStyle="bold" />
+            </FrameLayout>
 
-            <TextView
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:text="OR"
-                android:textStyle="bold"
-                android:textSize="10dp"
-                android:background="@drawable/rounded_textview"
-                android:textColor="#575757"
-                android:gravity="center"
-                android:layout_gravity="center_horizontal"/>
-        </FrameLayout>
+            <Button
+                android:id="@+id/objectsSelectFolder"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:backgroundTint="@color/colorAccent"
+                android:text="@string/select_folder_text"
+                android:textColor="@android:color/white" />
 
-        <Button
-            android:id="@+id/objectsSelectFolder"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/select_folder_text"
-            android:backgroundTint="@color/colorAccent"
-            android:textColor="@android:color/white"
-            android:layout_gravity="center_horizontal"/>
+            <Button
+                android:id="@+id/resourcesSettingsSave"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="16dp"
+                android:backgroundTint="@color/colorAccent"
+                android:text="@string/save_button_text"
+                android:textColor="@android:color/white" />
 
-        <Button
-            android:id="@+id/resourcesSettingsSave"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/save_button_text"
-            android:backgroundTint="@color/colorAccent"
-            android:textColor="@android:color/white"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="16dp"/>
-
-    </LinearLayout>
-</ScrollView>
+        </LinearLayout>
+    </ScrollView>
+</layout>
