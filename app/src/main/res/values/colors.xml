@@ -5,4 +5,10 @@
     <color name="colorAccent">#EB8000</color>
     <color name="headingBackgroundDark">#424242</color>
     <color name="headingColorDark">#FFFFFF</color>
+    <color name="tileNormal">#EEEEEE</color>
+    <color name="tileSelected">#BDBDBD</color>
+    <color name="tileIconNormal">#727272</color>
+    <color name="tileIconSelected">#555555</color>
+    <color name="searchButtonColor">#689F39</color>
+    <color name="clearAllButtonColor">#FF5721</color>
 </resources>

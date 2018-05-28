@@ -6,4 +6,5 @@
     <string name="objects_url_hint">Objects URL</string>
     <string name="save_button_text">Save</string>
     <string name="select_folder_text">Select Folder</string>
+    <string name="query_description_hint">Query Description</string>
 </resources>
