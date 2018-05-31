@@ -4,6 +4,8 @@ import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.databinding.DataBindingUtil
+import android.graphics.Color
+import android.graphics.PorterDuff
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
@@ -35,6 +37,8 @@ class SettingsActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.settings_activity)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        toolbar.navigationIcon?.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP)
 
         settingsViewModel = ViewModelProviders.of(this, SettingsViewModelFactory(this, API_SETTINGS_KEY)).get(SettingsViewModel::class.java)
         binding.settingsViewModel = settingsViewModel

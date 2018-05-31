@@ -14,13 +14,18 @@
         android:theme="@style/AppTheme" >
 
         <activity android:name="net.rdrei.android.dirchooser.DirectoryChooserActivity" />
-        <activity android:name=".features.settings.SettingsActivity" />
+        <activity
+            android:name=".features.settings.SettingsActivity"
+            android:parentActivityName=".features.query.QueryActivity" />
         <activity android:name=".features.query.QueryActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".components.drawing.DrawingActivity"
+            android:parentActivityName=".features.query.QueryActivity"></activity>
     </application>
 
 </manifest>

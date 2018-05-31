@@ -8,17 +8,15 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import kotlinx.android.synthetic.main.query_container.view.*
 import org.vitrivr.vitrivrapp.R
+import org.vitrivr.vitrivrapp.features.query.QueryToggles.QueryTerm
+
 
 class QueryContainer @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : CardView(context, attrs, defStyleAttr) {
 
-    enum class QueryTerm {
-        IMAGE, AUDIO, THREE_D, MOTION, TEXT, LOCATION
-    }
-
     private var deleteQueryContainerListener: (() -> Unit)? = null
-    private var queryTermToggleListener: ((queryTerm: QueryTerm, checked: Boolean) -> Unit)? = null
+    private var queryTermClickListener: ((queryTerm: QueryTerm, wasChecked: Boolean) -> Unit)? = null
     private var queryDescriptionChangeListener: ((description: String) -> Unit)? = null
 
     init {
@@ -27,13 +25,11 @@ class QueryContainer @JvmOverloads constructor(
 
         deleteContainer.setOnClickListener { deleteQueryContainerListener?.invoke() }
 
-        queryImage.setOnCheckedChangeListener { _, isChecked -> queryTermToggleListener?.invoke(QueryTerm.IMAGE, isChecked) }
-        queryAudio.setOnCheckedChangeListener { _, isChecked -> queryTermToggleListener?.invoke(QueryTerm.AUDIO, isChecked) }
-        query3D.setOnCheckedChangeListener { _, isChecked -> queryTermToggleListener?.invoke(QueryTerm.THREE_D, isChecked) }
-        queryMotion.setOnCheckedChangeListener { _, isChecked -> queryTermToggleListener?.invoke(QueryTerm.MOTION, isChecked) }
-        queryText.setOnCheckedChangeListener { _, isChecked -> queryTermToggleListener?.invoke(QueryTerm.TEXT, isChecked) }
-        queryLocation.setOnCheckedChangeListener { _, isChecked -> queryTermToggleListener?.invoke(QueryTerm.LOCATION, isChecked) }
+        queryToggles.addQueryTermClickListener { queryTerm, wasChecked ->
+            queryTermClickListener?.invoke(queryTerm, wasChecked)
+        }
 
+        queryDescription.isSaveEnabled = false
         queryDescription.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 s?.let { queryDescriptionChangeListener?.invoke(it.toString()) }
@@ -45,38 +41,32 @@ class QueryContainer @JvmOverloads constructor(
         })
     }
 
-    fun addDeleteQueryContainerListener(deleteQueryContainerListener: () -> Unit) {
+    fun addDeleteQueryContainerListener(deleteQueryContainerListener: (() -> Unit)?) {
         this.deleteQueryContainerListener = deleteQueryContainerListener
     }
 
-    fun addQueryTermToggleListener(queryTermToggleListener: (queryTerm: QueryTerm, checked: Boolean) -> Unit) {
-        this.queryTermToggleListener = queryTermToggleListener
+    fun addQueryTermClickListener(queryTermClickListener: ((queryTerm: QueryTerm, wasChecked: Boolean) -> Unit)?) {
+        this.queryTermClickListener = queryTermClickListener
     }
 
-    fun addQueryDescriptionChangeListener(queryDescriptionChangeListener: (description: String) -> Unit) {
+    fun addQueryDescriptionChangeListener(queryDescriptionChangeListener: ((description: String) -> Unit)?) {
         this.queryDescriptionChangeListener = queryDescriptionChangeListener
     }
 
-    fun removeDeleteQueryContainerListener() {
-        this.deleteQueryContainerListener = null
+    fun checkedStatus() = arrayOf(isChecked(QueryTerm.IMAGE), isChecked(QueryTerm.AUDIO), isChecked(QueryTerm.MODEL3D),
+            isChecked(QueryTerm.MOTION), isChecked(QueryTerm.TEXT), isChecked(QueryTerm.LOCATION))
+
+    fun isChecked(type: QueryTerm) = queryToggles.isChecked(type)
+
+    fun setChecked(type: QueryTerm, checked: Boolean) {
+        queryToggles.setChecked(type, checked)
     }
 
-    fun removeAddQueryTermToggleListener() {
-        this.queryTermToggleListener = null
+    fun performClick(type: QueryTerm) {
+        queryToggles.performClick(type)
     }
 
-    fun removeQueryDescriptionChangeListener() {
-        this.queryDescriptionChangeListener = null
+    fun setQueryDescription(description: String) {
+        queryDescription.setText(description)
     }
-
-    fun clearAllFields() {
-        queryDescription.setText("")
-        queryImage.isChecked = false
-        queryAudio.isChecked = false
-        query3D.isChecked = false
-        queryMotion.isChecked = false
-        queryText.isChecked = false
-        queryLocation.isChecked = false
-    }
-
 }

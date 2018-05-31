@@ -13,8 +13,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/colorPrimary"
-            app:layout_scrollFlags="scroll|enterAlways">
+            android:background="@color/colorPrimary">
 
             <ImageView
                 android:id="@+id/addMedia"
@@ -44,7 +43,7 @@
 
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
@@ -69,6 +68,7 @@
                 android:backgroundTint="@color/searchButtonColor"
                 android:text="SEARCH"
                 android:textColor="@android:color/white"
+                android:onClick="search"
                 android:textStyle="bold" />
 
             <Button
