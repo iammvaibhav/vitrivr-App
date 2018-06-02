@@ -29,6 +29,7 @@ android {
 
 dependencies {
     def lifecycle_version = "1.1.1"
+    def paging_version = "1.0.0"
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
@@ -36,6 +37,7 @@ dependencies {
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.android.support:cardview-v7:27.1.1'
     implementation "android.arch.lifecycle:extensions:$lifecycle_version"
+    implementation "android.arch.paging:runtime:$paging_version"
 
     //Dagger 2
     implementation 'com.google.dagger:dagger:2.16'
@@ -45,6 +47,7 @@ dependencies {
     implementation 'net.rdrei.android.dirchooser:library:3.2@aar'
     implementation 'com.google.code.gson:gson:2.8.4'
     implementation 'com.jaredrummler:colorpicker:1.0.2'
+    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
