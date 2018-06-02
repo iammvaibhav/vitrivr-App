@@ -21,8 +21,6 @@ import org.vitrivr.vitrivrapp.databinding.SettingsActivityBinding
 
 class SettingsActivity : AppCompatActivity() {
 
-    val API_SETTINGS_KEY = "API_SETTINGS"
-
     val THUMBNAILS_PICK_FOLDER_REQUEST_CODE = 1
     val OBJECTS_PICK_FOLDER_REQUEST_CODE = 2
     val THUMBNAILS_WRITE_PERMISSION_REQUEST = 1
@@ -40,9 +38,8 @@ class SettingsActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.navigationIcon?.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP)
 
-        settingsViewModel = ViewModelProviders.of(this, SettingsViewModelFactory(this, API_SETTINGS_KEY)).get(SettingsViewModel::class.java)
+        settingsViewModel = ViewModelProviders.of(this).get(SettingsViewModel::class.java)
         binding.settingsViewModel = settingsViewModel
-
 
         cineastSettingsSave.setOnClickListener {
             settingsViewModel.saveServerSettings(ServerModel(serverAddress.text.toString(), serverPort.text.toString().toIntOrNull() ?: 0))
