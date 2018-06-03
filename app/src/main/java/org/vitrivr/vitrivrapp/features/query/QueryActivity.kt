@@ -1,6 +1,7 @@
 package org.vitrivr.vitrivrapp.features.query
 
 import android.app.Activity
+import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.graphics.Bitmap
@@ -10,6 +11,7 @@ import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.widget.NestedScrollView
 import android.support.v7.app.AppCompatActivity
 import android.util.Base64
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,8 +24,7 @@ import kotlinx.android.synthetic.main.query_detail_bottom_sheet.*
 import org.vitrivr.vitrivrapp.R
 import org.vitrivr.vitrivrapp.components.drawing.DrawingActivity
 import org.vitrivr.vitrivrapp.components.drawing.DrawingActivity.Companion.IMAGE_PATH
-import org.vitrivr.vitrivrapp.data.model.QueryModel
-import org.vitrivr.vitrivrapp.data.model.QueryTermModel
+import org.vitrivr.vitrivrapp.data.model.*
 import org.vitrivr.vitrivrapp.features.query.QueryToggles.QueryTerm
 import org.vitrivr.vitrivrapp.features.settings.SettingsActivity
 import org.vitrivr.vitrivrapp.utils.px
@@ -165,7 +166,18 @@ class QueryActivity : AppCompatActivity() {
     }
 
     fun search(view: View) {
-        //val queryjson = queryViewModel.queryToJson()
+        val result = queryViewModel.search({ Log.e("Failure", it) }, { Log.e("Closed", "$it") })
+        result.observe(this, Observer {
+            val s = when (it?.messageType) {
+                MessageType.QR_START -> it as QueryResultStartModel?
+                MessageType.QR_END -> it as QueryResultEndModel?
+                MessageType.QR_SEGMENT -> it as QueryResultSegmentModel?
+                MessageType.QR_OBJECT -> it as QueryResultObjectModel?
+                MessageType.QR_SIMILARITY -> it as QueryResultSimilarityModel?
+                else -> it
+            }
+            Log.e("object received : ", s.toString())
+        })
     }
 
     fun getQueryContainerWithId(containerId: Long): QueryContainer? {

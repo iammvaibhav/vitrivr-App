@@ -1,13 +1,12 @@
 package org.vitrivr.vitrivrapp.features.query
 
+import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.ViewModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import org.vitrivr.vitrivrapp.App
-import org.vitrivr.vitrivrapp.data.model.MessageType
-import org.vitrivr.vitrivrapp.data.model.QueryContainerModel
-import org.vitrivr.vitrivrapp.data.model.QueryModel
-import org.vitrivr.vitrivrapp.data.model.QueryTermModel
+import org.vitrivr.vitrivrapp.data.model.*
+import org.vitrivr.vitrivrapp.data.repository.QueryResultsRepository
 import org.vitrivr.vitrivrapp.features.query.QueryToggles.QueryTerm
 import javax.inject.Inject
 
@@ -15,6 +14,9 @@ class QueryViewModel : ViewModel() {
 
     @Inject
     lateinit var gson: Gson
+    @Inject
+    lateinit var queryResultsRepository: QueryResultsRepository
+
     var query = QueryModel(MessageType.Q_SIM, ArrayList())
     var currContainerID = 0L
     var currTermType = QueryTerm.IMAGE
@@ -177,5 +179,9 @@ class QueryViewModel : ViewModel() {
 
     fun queryToJson(): String {
         return gson.toJson(query, object : TypeToken<QueryModel>() {}.type)
+    }
+
+    fun search(failure: (reason: String) -> Unit, closed: (code: Int) -> Unit): LiveData<QueryResultBaseModel> {
+        return queryResultsRepository.getQueryResults(queryToJson(), failure, closed)
     }
 }
