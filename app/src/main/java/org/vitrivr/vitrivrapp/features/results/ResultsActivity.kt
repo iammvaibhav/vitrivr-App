@@ -23,7 +23,7 @@ class ResultsActivity : AppCompatActivity() {
         }
 
         resultsViewModel = ViewModelProviders.of(this).get(ResultsViewModel::class.java)
-        //resultsViewModel.query = queryString
+        resultsViewModel.query = queryString
 
         val queryResults = resultsViewModel.getQueryResults(::failure, ::closed)
         queryResults.observe(this, Observer {
