@@ -8,15 +8,14 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import kotlinx.android.synthetic.main.query_container.view.*
 import org.vitrivr.vitrivrapp.R
-import org.vitrivr.vitrivrapp.features.query.QueryToggles.QueryTerm
-
+import org.vitrivr.vitrivrapp.data.model.enums.QueryTermType
 
 class QueryContainer @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : CardView(context, attrs, defStyleAttr) {
 
     private var deleteQueryContainerListener: (() -> Unit)? = null
-    private var queryTermClickListener: ((queryTerm: QueryTerm, wasChecked: Boolean) -> Unit)? = null
+    private var queryTermClickListener: ((queryTerm: QueryTermType, wasChecked: Boolean) -> Unit)? = null
     private var queryDescriptionChangeListener: ((description: String) -> Unit)? = null
 
     init {
@@ -45,7 +44,7 @@ class QueryContainer @JvmOverloads constructor(
         this.deleteQueryContainerListener = deleteQueryContainerListener
     }
 
-    fun addQueryTermClickListener(queryTermClickListener: ((queryTerm: QueryTerm, wasChecked: Boolean) -> Unit)?) {
+    fun addQueryTermClickListener(queryTermClickListener: ((queryTerm: QueryTermType, wasChecked: Boolean) -> Unit)?) {
         this.queryTermClickListener = queryTermClickListener
     }
 
@@ -53,16 +52,16 @@ class QueryContainer @JvmOverloads constructor(
         this.queryDescriptionChangeListener = queryDescriptionChangeListener
     }
 
-    fun checkedStatus() = arrayOf(isChecked(QueryTerm.IMAGE), isChecked(QueryTerm.AUDIO), isChecked(QueryTerm.MODEL3D),
-            isChecked(QueryTerm.MOTION), isChecked(QueryTerm.TEXT), isChecked(QueryTerm.LOCATION))
+    fun checkedStatus() = arrayOf(isChecked(QueryTermType.IMAGE), isChecked(QueryTermType.AUDIO), isChecked(QueryTermType.MODEL3D),
+            isChecked(QueryTermType.MOTION), isChecked(QueryTermType.TEXT), isChecked(QueryTermType.LOCATION))
 
-    fun isChecked(type: QueryTerm) = queryToggles.isChecked(type)
+    fun isChecked(type: QueryTermType) = queryToggles.isChecked(type)
 
-    fun setChecked(type: QueryTerm, checked: Boolean) {
+    fun setChecked(type: QueryTermType, checked: Boolean) {
         queryToggles.setChecked(type, checked)
     }
 
-    fun performClick(type: QueryTerm) {
+    fun performClick(type: QueryTermType) {
         queryToggles.performClick(type)
     }
 

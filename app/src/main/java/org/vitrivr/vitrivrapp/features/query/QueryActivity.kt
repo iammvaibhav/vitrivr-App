@@ -1,7 +1,6 @@
 package org.vitrivr.vitrivrapp.features.query
 
 import android.app.Activity
-import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.graphics.Bitmap
@@ -11,7 +10,6 @@ import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.widget.NestedScrollView
 import android.support.v7.app.AppCompatActivity
 import android.util.Base64
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,8 +22,10 @@ import kotlinx.android.synthetic.main.query_detail_bottom_sheet.*
 import org.vitrivr.vitrivrapp.R
 import org.vitrivr.vitrivrapp.components.drawing.DrawingActivity
 import org.vitrivr.vitrivrapp.components.drawing.DrawingActivity.Companion.IMAGE_PATH
-import org.vitrivr.vitrivrapp.data.model.*
-import org.vitrivr.vitrivrapp.features.query.QueryToggles.QueryTerm
+import org.vitrivr.vitrivrapp.data.model.enums.QueryTermType
+import org.vitrivr.vitrivrapp.data.model.query.QueryModel
+import org.vitrivr.vitrivrapp.data.model.query.QueryTermModel
+import org.vitrivr.vitrivrapp.features.results.ResultsActivity
 import org.vitrivr.vitrivrapp.features.settings.SettingsActivity
 import org.vitrivr.vitrivrapp.utils.px
 import java.io.ByteArrayOutputStream
@@ -73,7 +73,7 @@ class QueryActivity : AppCompatActivity() {
                 if (currContainerId != -1L) {
                     queryViewModel.currContainerID = currContainerId
                     queryViewModel.query = it.getParcelable(QUERY_OBJECT) as QueryModel
-                    queryViewModel.currTermType = it.getSerializable(CURR_TERM_TYPE) as QueryTerm
+                    queryViewModel.currTermType = it.getSerializable(CURR_TERM_TYPE) as QueryTermType
                 }
             }
         }
@@ -166,18 +166,9 @@ class QueryActivity : AppCompatActivity() {
     }
 
     fun search(view: View) {
-        val result = queryViewModel.search({ Log.e("Failure", it) }, { Log.e("Closed", "$it") })
-        result.observe(this, Observer {
-            val s = when (it?.messageType) {
-                MessageType.QR_START -> it as QueryResultStartModel?
-                MessageType.QR_END -> it as QueryResultEndModel?
-                MessageType.QR_SEGMENT -> it as QueryResultSegmentModel?
-                MessageType.QR_OBJECT -> it as QueryResultObjectModel?
-                MessageType.QR_SIMILARITY -> it as QueryResultSimilarityModel?
-                else -> it
-            }
-            Log.e("object received : ", s.toString())
-        })
+        val intent = Intent(this, ResultsActivity::class.java)
+        intent.putExtra("query", queryViewModel.queryToJson())
+        startActivity(intent)
     }
 
     fun getQueryContainerWithId(containerId: Long): QueryContainer? {
@@ -200,13 +191,13 @@ class QueryActivity : AppCompatActivity() {
 
     }
 
-    fun prepareBottomSheet(type: QueryTerm, wasChecked: Boolean, containerId: Long) {
+    fun prepareBottomSheet(type: QueryTermType, wasChecked: Boolean, containerId: Long) {
         when (type) {
-            QueryTerm.IMAGE -> {
+            QueryTermType.IMAGE -> {
                 toolTitle.text = "Image Query"
                 enableTerm.setOnCheckedChangeListener(null)
                 enableTerm.isChecked = true
-                bottomSheetToggles.setChecked(QueryTerm.IMAGE, true)
+                bottomSheetToggles.setChecked(QueryTermType.IMAGE, true)
                 enableTerm.setOnCheckedChangeListener(enableTermListener)
 
                 toolsContainer.removeAllViews()
@@ -214,7 +205,7 @@ class QueryActivity : AppCompatActivity() {
                 val drawImageBalance = toolsContainer.findViewById<SeekBar>(R.id.drawImageBalance)
                 drawImageBalance.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                        queryViewModel.setBalance(containerId, QueryTerm.IMAGE, progress)
+                        queryViewModel.setBalance(containerId, QueryTermType.IMAGE, progress)
                     }
 
                     override fun onStartTrackingTouch(seekBar: SeekBar?) {}
@@ -224,20 +215,20 @@ class QueryActivity : AppCompatActivity() {
 
                 if (wasChecked) {
                     // restore state
-                    drawImageBalance.progress = queryViewModel.getBalance(containerId, QueryTerm.IMAGE)
+                    drawImageBalance.progress = queryViewModel.getBalance(containerId, QueryTermType.IMAGE)
                     val image = BitmapFactory.decodeFile(File(filesDir, "imageQuery_image_${queryViewModel.currContainerID}.png").absolutePath)
                     toolsContainer.findViewById<ImageView>(R.id.imagePreview).setImageBitmap(image)
                 } else {
-                    queryViewModel.addQueryTermToContainer(containerId, QueryTerm.IMAGE)
+                    queryViewModel.addQueryTermToContainer(containerId, QueryTermType.IMAGE)
                 }
             }
         //TODO("Other types")
         }
     }
 
-    fun freeResources(type: QueryTerm, containerID: Long) {
+    fun freeResources(type: QueryTermType, containerID: Long) {
         when (type) {
-            QueryTerm.IMAGE -> {
+            QueryTermType.IMAGE -> {
                 val preview = File(filesDir, "imageQuery_image_$containerID.png")
                 val orig = File(filesDir, "imageQuery_image_orig_$containerID.png")
                 if (preview.exists()) preview.delete()
@@ -255,10 +246,10 @@ class QueryActivity : AppCompatActivity() {
                     val outputStream = ByteArrayOutputStream()
                     image.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
                     val base64String = Base64.encodeToString(outputStream.toByteArray(), Base64.DEFAULT)
-                    queryViewModel.setDataOfQueryTerm(queryViewModel.currContainerID, QueryTerm.IMAGE, base64String)
-                    getQueryContainerWithId(queryViewModel.currContainerID)?.performClick(QueryTerm.IMAGE)
+                    queryViewModel.setDataOfQueryTerm(queryViewModel.currContainerID, QueryTermType.IMAGE, base64String)
+                    getQueryContainerWithId(queryViewModel.currContainerID)?.performClick(QueryTermType.IMAGE)
                 } else if (resultCode == Activity.RESULT_CANCELED) {
-                    getQueryContainerWithId(queryViewModel.currContainerID)?.performClick(QueryTerm.IMAGE)
+                    getQueryContainerWithId(queryViewModel.currContainerID)?.performClick(QueryTermType.IMAGE)
                 }
             }
         }

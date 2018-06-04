@@ -4,6 +4,7 @@ import dagger.Component
 import org.vitrivr.vitrivrapp.data.helper.SharedPreferenceHelper
 import org.vitrivr.vitrivrapp.data.repository.QueryResultsRepository
 import org.vitrivr.vitrivrapp.features.query.QueryViewModel
+import org.vitrivr.vitrivrapp.features.results.ResultsViewModel
 import org.vitrivr.vitrivrapp.features.settings.SettingsViewModel
 import javax.inject.Singleton
 
@@ -14,6 +15,7 @@ interface AppComponent {
     fun inject(sharedPreferenceHelper: SharedPreferenceHelper)
     fun inject(viewModel: QueryViewModel)
     fun inject(viewModel: SettingsViewModel)
+    fun inject(resultsViewModel: ResultsViewModel)
     fun inject(queryResultsRepository: QueryResultsRepository)
 
 }

@@ -2,8 +2,8 @@ package org.vitrivr.vitrivrapp.features.settings
 
 import android.arch.lifecycle.ViewModel
 import org.vitrivr.vitrivrapp.App
-import org.vitrivr.vitrivrapp.data.model.ResourcesModel
-import org.vitrivr.vitrivrapp.data.model.ServerModel
+import org.vitrivr.vitrivrapp.data.model.settings.ResourcesModel
+import org.vitrivr.vitrivrapp.data.model.settings.ServerModel
 import org.vitrivr.vitrivrapp.data.services.SettingsService
 import javax.inject.Inject
 

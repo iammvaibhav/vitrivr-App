@@ -3,7 +3,7 @@ package org.vitrivr.vitrivrapp.data.repository
 import android.arch.lifecycle.LiveData
 import android.util.Log
 import org.vitrivr.vitrivrapp.App
-import org.vitrivr.vitrivrapp.data.model.QueryResultBaseModel
+import org.vitrivr.vitrivrapp.data.model.results.QueryResultBaseModel
 import org.vitrivr.vitrivrapp.data.services.QueryResultsService
 import org.vitrivr.vitrivrapp.data.services.SettingsService
 import javax.inject.Inject

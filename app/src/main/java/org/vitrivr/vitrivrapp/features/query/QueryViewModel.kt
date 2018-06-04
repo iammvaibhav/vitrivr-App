@@ -1,25 +1,24 @@
 package org.vitrivr.vitrivrapp.features.query
 
-import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.ViewModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import org.vitrivr.vitrivrapp.App
-import org.vitrivr.vitrivrapp.data.model.*
-import org.vitrivr.vitrivrapp.data.repository.QueryResultsRepository
-import org.vitrivr.vitrivrapp.features.query.QueryToggles.QueryTerm
+import org.vitrivr.vitrivrapp.data.model.enums.MessageType
+import org.vitrivr.vitrivrapp.data.model.enums.QueryTermType
+import org.vitrivr.vitrivrapp.data.model.query.QueryContainerModel
+import org.vitrivr.vitrivrapp.data.model.query.QueryModel
+import org.vitrivr.vitrivrapp.data.model.query.QueryTermModel
 import javax.inject.Inject
 
 class QueryViewModel : ViewModel() {
 
     @Inject
     lateinit var gson: Gson
-    @Inject
-    lateinit var queryResultsRepository: QueryResultsRepository
 
     var query = QueryModel(MessageType.Q_SIM, ArrayList())
     var currContainerID = 0L
-    var currTermType = QueryTerm.IMAGE
+    var currTermType = QueryTermType.IMAGE
     var isNewViewModel = true
 
     init {
@@ -52,7 +51,7 @@ class QueryViewModel : ViewModel() {
         return null
     }
 
-    fun getTermInContainer(type: QueryTerm, container: QueryContainerModel?): QueryTermModel? {
+    fun getTermInContainer(type: QueryTermType, container: QueryContainerModel?): QueryTermModel? {
         if (container == null)
             return null
         for (term in container.terms) {
@@ -62,19 +61,19 @@ class QueryViewModel : ViewModel() {
         return null
     }
 
-    fun addQueryTermToContainer(containerId: Long, type: QueryTerm) {
+    fun addQueryTermToContainer(containerId: Long, type: QueryTermType) {
         val categories = when (type) {
-            QueryTerm.IMAGE -> arrayListOf("globalcolor", "localcolor")
-            QueryTerm.AUDIO -> arrayListOf("audiofingerprint")
-            QueryTerm.MODEL3D -> arrayListOf("sphericalharmonicslow")
-            QueryTerm.MOTION -> arrayListOf("motion")
-            QueryTerm.TEXT -> arrayListOf()
-            QueryTerm.LOCATION -> TODO("Location is not implemented yet")
+            QueryTermType.IMAGE -> arrayListOf("globalcolor", "localcolor")
+            QueryTermType.AUDIO -> arrayListOf("audiofingerprint")
+            QueryTermType.MODEL3D -> arrayListOf("sphericalharmonicslow")
+            QueryTermType.MOTION -> arrayListOf("motion")
+            QueryTermType.TEXT -> arrayListOf()
+            QueryTermType.LOCATION -> TODO("Location is not implemented yet")
         }
         getContainerWithId(containerId)?.terms?.add(QueryTermModel("", categories, type))
     }
 
-    fun removeQueryTermFromContainer(containerId: Long, type: QueryTerm) {
+    fun removeQueryTermFromContainer(containerId: Long, type: QueryTermType) {
         val container = getContainerWithId(containerId)
         if (container == null)
             return
@@ -93,25 +92,25 @@ class QueryViewModel : ViewModel() {
         container?.description = queryDescription
     }
 
-    fun setDataOfQueryTerm(containerId: Long, type: QueryTerm, base64String: String) {
+    fun setDataOfQueryTerm(containerId: Long, type: QueryTermType, base64String: String) {
         val term = getTermInContainer(type, getContainerWithId(containerId))
         val data = when (type) {
-            QueryTerm.IMAGE -> "data:image/png;base64,$base64String"
-            QueryTerm.AUDIO -> "data:audio/wav;base64,$base64String"
-            QueryTerm.MODEL3D -> "data:application/3d-json;base64,$base64String"
-            QueryTerm.MOTION -> "data:application/json;base64,$base64String"
-            QueryTerm.TEXT -> base64String
-            QueryTerm.LOCATION -> TODO("Location is not implemented yet")
+            QueryTermType.IMAGE -> "data:image/png;base64,$base64String"
+            QueryTermType.AUDIO -> "data:audio/wav;base64,$base64String"
+            QueryTermType.MODEL3D -> "data:application/3d-json;base64,$base64String"
+            QueryTermType.MOTION -> "data:application/json;base64,$base64String"
+            QueryTermType.TEXT -> base64String
+            QueryTermType.LOCATION -> TODO("Location is not implemented yet")
         }
         term?.data = data
     }
 
-    fun setBalance(containerId: Long, type: QueryTerm, progress: Int) {
+    fun setBalance(containerId: Long, type: QueryTermType, progress: Int) {
         val term = getTermInContainer(type, getContainerWithId(containerId))
         term?.categories?.clear()
 
         when (type) {
-            QueryTerm.IMAGE -> {
+            QueryTermType.IMAGE -> {
                 when (progress) {
                     0 -> term?.categories?.addAll(listOf("globalcolor", "localcolor"))
                     1 -> term?.categories?.addAll(listOf("globalcolor", "localcolor", "quantized"))
@@ -120,7 +119,7 @@ class QueryViewModel : ViewModel() {
                     4 -> term?.categories?.addAll(listOf("localcolor", "localfeatures", "edge"))
                 }
             }
-            QueryTerm.AUDIO -> {
+            QueryTermType.AUDIO -> {
                 when (progress) {
                     0 -> term?.categories?.addAll(listOf("audiofingerprint"))
                     1 -> term?.categories?.addAll(listOf("audiofingerprint", "audiomatching"))
@@ -129,7 +128,7 @@ class QueryViewModel : ViewModel() {
                     4 -> term?.categories?.addAll(listOf("pitchsequence"))
                 }
             }
-            QueryTerm.MODEL3D -> {
+            QueryTermType.MODEL3D -> {
                 when (progress) {
                     0 -> term?.categories?.addAll(listOf("sphericalharmonicslow"))
                     1 -> term?.categories?.addAll(listOf("sphericalharmonicsdefault"))
@@ -139,11 +138,11 @@ class QueryViewModel : ViewModel() {
         }
     }
 
-    fun getBalance(containerId: Long, type: QueryTerm): Int {
+    fun getBalance(containerId: Long, type: QueryTermType): Int {
         val categories = getTermInContainer(type, getContainerWithId(containerId))?.categories
         categories?.let {
             when (type) {
-                QueryTerm.IMAGE -> {
+                QueryTermType.IMAGE -> {
                     when (categories) {
                         listOf("globalcolor", "localcolor") -> return 0
                         listOf("globalcolor", "localcolor", "quantized") -> return 1
@@ -153,7 +152,7 @@ class QueryViewModel : ViewModel() {
                         else -> return 0
                     }
                 }
-                QueryTerm.AUDIO -> {
+                QueryTermType.AUDIO -> {
                     when (categories) {
                         listOf("audiofingerprint") -> return 0
                         listOf("audiofingerprint", "audiomatching") -> return 1
@@ -163,7 +162,7 @@ class QueryViewModel : ViewModel() {
                         else -> return 0
                     }
                 }
-                QueryTerm.MODEL3D -> {
+                QueryTermType.MODEL3D -> {
                     when (categories) {
                         listOf("sphericalharmonicslow") -> return 0
                         listOf("sphericalharmonicsdefault") -> return 1
@@ -179,9 +178,5 @@ class QueryViewModel : ViewModel() {
 
     fun queryToJson(): String {
         return gson.toJson(query, object : TypeToken<QueryModel>() {}.type)
-    }
-
-    fun search(failure: (reason: String) -> Unit, closed: (code: Int) -> Unit): LiveData<QueryResultBaseModel> {
-        return queryResultsRepository.getQueryResults(queryToJson(), failure, closed)
     }
 }

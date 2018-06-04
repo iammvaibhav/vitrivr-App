@@ -4,8 +4,8 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.content.Context
 import org.vitrivr.vitrivrapp.data.helper.SharedPreferenceHelper
-import org.vitrivr.vitrivrapp.data.model.ResourcesModel
-import org.vitrivr.vitrivrapp.data.model.ServerModel
+import org.vitrivr.vitrivrapp.data.model.settings.ResourcesModel
+import org.vitrivr.vitrivrapp.data.model.settings.ServerModel
 import javax.inject.Inject
 
 class SettingsService @Inject constructor(context: Context) {

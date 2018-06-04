@@ -15,8 +15,8 @@ import kotlinx.android.synthetic.main.settings_activity.*
 import net.rdrei.android.dirchooser.DirectoryChooserActivity
 import net.rdrei.android.dirchooser.DirectoryChooserConfig
 import org.vitrivr.vitrivrapp.R
-import org.vitrivr.vitrivrapp.data.model.ResourcesModel
-import org.vitrivr.vitrivrapp.data.model.ServerModel
+import org.vitrivr.vitrivrapp.data.model.settings.ResourcesModel
+import org.vitrivr.vitrivrapp.data.model.settings.ServerModel
 import org.vitrivr.vitrivrapp.databinding.SettingsActivityBinding
 
 class SettingsActivity : AppCompatActivity() {
@@ -42,7 +42,8 @@ class SettingsActivity : AppCompatActivity() {
         binding.settingsViewModel = settingsViewModel
 
         cineastSettingsSave.setOnClickListener {
-            settingsViewModel.saveServerSettings(ServerModel(serverAddress.text.toString(), serverPort.text.toString().toIntOrNull() ?: 0))
+            settingsViewModel.saveServerSettings(ServerModel(serverAddress.text.toString(), serverPort.text.toString().toIntOrNull()
+                    ?: 0))
             Toast.makeText(this@SettingsActivity, "Server Settings Saved", Toast.LENGTH_SHORT).show()
         }
 

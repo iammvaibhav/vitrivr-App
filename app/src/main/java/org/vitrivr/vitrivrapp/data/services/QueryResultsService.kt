@@ -4,7 +4,8 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import com.google.gson.Gson
 import okhttp3.*
-import org.vitrivr.vitrivrapp.data.model.*
+import org.vitrivr.vitrivrapp.data.model.enums.MessageType
+import org.vitrivr.vitrivrapp.data.model.results.*
 import javax.inject.Inject
 
 class QueryResultsService @Inject constructor(val okHttpClient: OkHttpClient, val gson: Gson) {
