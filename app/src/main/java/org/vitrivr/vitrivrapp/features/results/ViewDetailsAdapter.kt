@@ -9,15 +9,25 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import com.squareup.picasso.Picasso
+import org.vitrivr.vitrivrapp.App
 import org.vitrivr.vitrivrapp.R
+import org.vitrivr.vitrivrapp.data.model.enums.ResultViewType
 import org.vitrivr.vitrivrapp.data.model.results.QueryResultPresenterModel
 import org.vitrivr.vitrivrapp.utils.format
+import javax.inject.Inject
 
 
-class ViewLargeAdapter(val items: List<QueryResultPresenterModel>, val directoryPath: String) : RecyclerView.Adapter<ViewLargeAdapter.Companion.ViewLarge_VH>() {
+class ViewDetailsAdapter(val items: List<QueryResultPresenterModel>, val resultViewType: ResultViewType) : RecyclerView.Adapter<ViewDetailsAdapter.Companion.ViewDetailVH>() {
+
+    @Inject
+    lateinit var pathUtils: PathUtils
+
+    init {
+        App.daggerAppComponent.inject(this)
+    }
 
     companion object {
-        class ViewLarge_VH(view: View) : RecyclerView.ViewHolder(view) {
+        class ViewDetailVH(view: View) : RecyclerView.ViewHolder(view) {
             val fileName = view.findViewById<TextView>(R.id.fileName)
             val matchPercent = view.findViewById<TextView>(R.id.matchPercent)
             val previewThumbnail = view.findViewById<ImageView>(R.id.previewImage)
@@ -27,14 +37,15 @@ class ViewLargeAdapter(val items: List<QueryResultPresenterModel>, val directory
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewLarge_VH {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.result_view_large, parent, false)
-        return ViewLarge_VH(view)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewDetailVH {
+        val layout = if (resultViewType == ResultViewType.LARGE) R.layout.result_view_large else R.layout.result_view_medium
+        val view = LayoutInflater.from(parent.context).inflate(layout, parent, false)
+        return ViewDetailVH(view)
     }
 
     override fun getItemCount() = items.size
 
-    override fun onBindViewHolder(holder: ViewLarge_VH, position: Int) {
+    override fun onBindViewHolder(holder: ViewDetailVH, position: Int) {
         holder.fileName.text = items[position].fileName
         holder.matchPercent.text = "${(items[position].segmentDetail.matchValue * 100).format(2)}%"
 
@@ -57,6 +68,23 @@ class ViewLargeAdapter(val items: List<QueryResultPresenterModel>, val directory
             featureInfoDialog.window.findViewById<TextView>(android.R.id.message).typeface = Typeface.MONOSPACE
         }
 
-        Picasso.get().load(directoryPath + items[position].filePath).into(holder.previewThumbnail)
+        if (pathUtils.isThumbnailPathLocal() == true) {
+            pathUtils.getFileOfThumbnail(items[position])?.let {
+                Picasso.get()
+                        .load(it)
+                        .fit()
+                        .centerCrop()
+                        .into(holder.previewThumbnail)
+            }
+            return
+        }
+
+        pathUtils.getThumbnailCompletePath(items[position])?.let {
+            Picasso.get()
+                    .load(it)
+                    .fit()
+                    .centerCrop()
+                    .into(holder.previewThumbnail)
+        }
     }
 }

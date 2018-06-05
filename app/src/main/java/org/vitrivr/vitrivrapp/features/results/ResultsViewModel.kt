@@ -18,7 +18,6 @@ class ResultsViewModel : ViewModel() {
 
     @Inject
     lateinit var queryResultsRepository: QueryResultsRepository
-    var query: String = ""
     private var categoryCount: HashMap<MediaType, HashSet<String>> = HashMap()
 
     private val resultPresenterList = ArrayList<QueryResultPresenterModel>()
@@ -93,7 +92,7 @@ class ResultsViewModel : ViewModel() {
         App.daggerAppComponent.inject(this)
     }
 
-    fun getQueryResults(failure: (reason: String) -> Unit, closed: () -> Unit): LiveData<List<QueryResultPresenterModel>> {
+    fun getQueryResults(query: String, failure: (reason: String) -> Unit, closed: () -> Unit): LiveData<List<QueryResultPresenterModel>> {
         val queryResult = queryResultsRepository.getQueryResults(query)
         queryResult.subscribe(queryResultObserver, Consumer {
             failure(it.message ?: "Failure")
