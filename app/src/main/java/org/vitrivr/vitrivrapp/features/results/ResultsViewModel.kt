@@ -2,57 +2,59 @@ package org.vitrivr.vitrivrapp.features.results
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModel
-import android.util.Log
+import io.reactivex.functions.Action
+import io.reactivex.functions.Consumer
 import org.vitrivr.vitrivrapp.App
 import org.vitrivr.vitrivrapp.data.model.enums.MediaType
 import org.vitrivr.vitrivrapp.data.model.enums.MessageType
 import org.vitrivr.vitrivrapp.data.model.results.*
 import org.vitrivr.vitrivrapp.data.repository.QueryResultsRepository
+import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 class ResultsViewModel : ViewModel() {
 
     @Inject
     lateinit var queryResultsRepository: QueryResultsRepository
     var query: String = ""
-    var categoryCount: HashMap<MediaType, HashSet<String>> = HashMap()
+    private var categoryCount: HashMap<MediaType, HashSet<String>> = HashMap()
 
-    val resultPresenterList = ArrayList<QueryResultPresenterModel>()
+    private val resultPresenterList = ArrayList<QueryResultPresenterModel>()
+    private val sortedResultPresenterList = ArrayList<QueryResultPresenterModel>()
 
     private val insertedObjects = HashMap<String, Int>()
     private val liveResultPresenterList = MutableLiveData<List<QueryResultPresenterModel>>()
 
-    var queryResultCategories = ArrayList<QueryResultCategoryModel>()
-    var queryResultSegmentModel: QueryResultSegmentModel? = null
-    var queryResultObjectModel: QueryResultObjectModel? = null
-    var queryResultSimilarityModel: QueryResultSimilarityModel? = null
+    private var queryResultSegmentModel: QueryResultSegmentModel? = null
+    private var queryResultObjectModel: QueryResultObjectModel? = null
+    private var queryResultSimilarityModel: QueryResultSimilarityModel? = null
 
-    lateinit var removeObserverCallback: () -> Unit
 
-    val queryResultObserver = Observer<QueryResultBaseModel> {
-        when (it?.messageType) {
+    private val queryResultObserver = Consumer<QueryResultBaseModel> {
+
+        when (it.messageType) {
             MessageType.QR_START -> {
-                queryResultCategories.clear()
                 resultPresenterList.clear()
                 insertedObjects.clear()
                 categoryCount.clear()
+
                 queryResultSegmentModel = null
                 queryResultObjectModel = null
                 queryResultSimilarityModel = null
             }
 
             MessageType.QR_SEGMENT -> {
-                queryResultSegmentModel = it as QueryResultSegmentModel?
+                queryResultSegmentModel = it as QueryResultSegmentModel
             }
 
             MessageType.QR_OBJECT -> {
-                queryResultObjectModel = it as QueryResultObjectModel?
+                queryResultObjectModel = it as QueryResultObjectModel
             }
 
             MessageType.QR_SIMILARITY -> {
-                queryResultSimilarityModel = it as QueryResultSimilarityModel?
+                queryResultSimilarityModel = it as QueryResultSimilarityModel
                 if (queryResultSegmentModel != null && queryResultObjectModel != null && queryResultSimilarityModel != null) {
                     val availableMediaTypes = HashSet<MediaType>()
                     queryResultObjectModel!!.content.forEach {
@@ -69,11 +71,12 @@ class ResultsViewModel : ViewModel() {
                         }
                     }
 
-                    Log.e("categoryCount", categoryCount.toString())
-
                     val categoryItem = QueryResultCategoryModel(queryResultSegmentModel!!, queryResultObjectModel!!, queryResultSimilarityModel!!)
                     addToPresenterResults(categoryItem)
-                    liveResultPresenterList.postValue(resultPresenterList)
+                    sortedResultPresenterList.clear()
+                    sortedResultPresenterList.addAll(resultPresenterList)
+                    sortedResultPresenterList.sortByDescending { it.segmentDetail.matchValue }
+                    liveResultPresenterList.postValue(sortedResultPresenterList)
                     queryResultSegmentModel = null
                     queryResultObjectModel = null
                     queryResultSimilarityModel = null
@@ -81,7 +84,7 @@ class ResultsViewModel : ViewModel() {
             }
 
             MessageType.QR_END -> {
-                removeObserverCallback()
+                //QueryEnd
             }
         }
     }
@@ -90,17 +93,15 @@ class ResultsViewModel : ViewModel() {
         App.daggerAppComponent.inject(this)
     }
 
-    fun getQueryResults(failure: (reason: String) -> Unit, closed: (code: Int) -> Unit): LiveData<List<QueryResultPresenterModel>> {
-        val queryResult = queryResultsRepository.getQueryResults(query, failure, closed)
-        removeObserverCallback = {
-            queryResult.removeObserver(queryResultObserver)
-        }
-        queryResult.observeForever(queryResultObserver)
+    fun getQueryResults(failure: (reason: String) -> Unit, closed: () -> Unit): LiveData<List<QueryResultPresenterModel>> {
+        val queryResult = queryResultsRepository.getQueryResults(query)
+        queryResult.subscribe(queryResultObserver, Consumer {
+            failure(it.message ?: "Failure")
+        }, Action { closed() })
         return liveResultPresenterList
     }
 
     private fun addToPresenterResults(categoryItem: QueryResultCategoryModel) {
-
         val category = categoryItem.queryResultSimilarityModel.category
         val categoryWeight = HashMap<String, Double>()
         val objectMap = HashMap<String, ObjectModel>()
@@ -145,6 +146,7 @@ class ResultsViewModel : ViewModel() {
                      * check if this particular segment exists. If yes, then add the category details
                      * else add the new segment to this object
                      */
+
                     val presenterItem = resultPresenterList[insertedObjects[segment.objectId]!!]
                     var isThisSegmentPresent = false
 
@@ -153,8 +155,8 @@ class ResultsViewModel : ViewModel() {
                             isThisSegmentPresent = true
                             if (it.categoriesWeights.containsKey(category)) {
                                 /**
-                                 * If an entry of the same category already exists, then choose from
-                                 * that and the current one which has higher category weight.
+                                 * If an entry of the same category already exists, then choose the
+                                 * one which has higher category weight.
                                  */
                                 if (it.categoriesWeights[category]!! < segmentWeight) {
                                     it.categoriesWeights[category] = segmentWeight
@@ -194,4 +196,6 @@ class ResultsViewModel : ViewModel() {
             presenterObject.numberOfSegments = presenterObject.allSegments.size
         }
     }
+
+    fun getDirectoryPath() = queryResultsRepository.getDirectoryPath()
 }

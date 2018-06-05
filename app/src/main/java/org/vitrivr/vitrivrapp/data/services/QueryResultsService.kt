@@ -1,34 +1,37 @@
 package org.vitrivr.vitrivrapp.data.services
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
+import android.util.Log
 import com.google.gson.Gson
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.subjects.ReplaySubject
 import okhttp3.*
+import org.json.JSONObject
 import org.vitrivr.vitrivrapp.data.model.enums.MessageType
 import org.vitrivr.vitrivrapp.data.model.results.*
 import javax.inject.Inject
 
 class QueryResultsService @Inject constructor(val okHttpClient: OkHttpClient, val gson: Gson) {
 
-    fun getQueryResults(query: String, url: String, failure: (reason: String) -> Unit, closed: (code: Int) -> Unit): LiveData<QueryResultBaseModel> {
+    fun getQueryResults(query: String, url: String): Observable<QueryResultBaseModel> {
         val request = Request.Builder()
                 .url(url)
                 .build()
-        val queryListener = QueryResultsListener(query, failure, closed, gson)
+        val queryListener = QueryResultsListener(query, gson)
         val webSocket = okHttpClient.newWebSocket(request, queryListener)
         return queryListener.getQueryResults()
     }
 
-    class QueryResultsListener(val query: String, private val failure: (reason: String) -> Unit, private val closed: (code: Int) -> Unit, val gson: Gson) : WebSocketListener() {
+    class QueryResultsListener(val query: String, val gson: Gson) : WebSocketListener() {
 
-        var queryResults: MutableLiveData<QueryResultBaseModel> = MutableLiveData()
+        private var queryResults: ReplaySubject<QueryResultBaseModel> = ReplaySubject.create()
 
         companion object {
-            val CLOSE_CODE_NORMAL = 1000
+            const val CLOSE_CODE_NORMAL = 1000
         }
 
-        fun getQueryResults(): LiveData<QueryResultBaseModel> {
-            return queryResults
+        fun getQueryResults(): Observable<QueryResultBaseModel> {
+            return queryResults.observeOn(AndroidSchedulers.mainThread())
         }
 
         override fun onOpen(webSocket: WebSocket?, response: Response?) {
@@ -38,14 +41,12 @@ class QueryResultsService @Inject constructor(val okHttpClient: OkHttpClient, va
 
         override fun onFailure(webSocket: WebSocket?, t: Throwable?, response: Response?) {
             super.onFailure(webSocket, t, response)
-            failure(t?.message ?: "Failure")
+            queryResults.onError(t ?: Throwable("Failure"))
         }
 
         override fun onMessage(webSocket: WebSocket?, text: String?) {
             super.onMessage(webSocket, text)
-
-            if (text == null)
-                failure("Null Message Received")
+            Log.d("result", JSONObject(text).toString(4))
 
             text?.let {
                 val baseQueryHelper = gson.fromJson<QueryResultBaseHelperModel>(it, QueryResultBaseHelperModel::class.java)
@@ -54,7 +55,7 @@ class QueryResultsService @Inject constructor(val okHttpClient: OkHttpClient, va
                         get() = baseQueryHelper.messageType
                 }
 
-                queryResults.postValue(when (baseQuery.messageType) {
+                queryResults.onNext(when (baseQuery.messageType) {
                     MessageType.QR_START -> gson.fromJson(it, QueryResultStartModel::class.java)
                     MessageType.QR_END -> gson.fromJson(it, QueryResultEndModel::class.java)
                     MessageType.QR_SEGMENT -> gson.fromJson(it, QueryResultSegmentModel::class.java)
@@ -67,7 +68,7 @@ class QueryResultsService @Inject constructor(val okHttpClient: OkHttpClient, va
 
         override fun onClosed(webSocket: WebSocket?, code: Int, reason: String?) {
             super.onClosed(webSocket, code, reason)
-            closed(code)
+            queryResults.onComplete()
         }
     }
 }

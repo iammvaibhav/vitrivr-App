@@ -245,7 +245,7 @@ class QueryActivity : AppCompatActivity() {
                     val image = BitmapFactory.decodeFile(data.getStringExtra(IMAGE_PATH))
                     val outputStream = ByteArrayOutputStream()
                     image.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-                    val base64String = Base64.encodeToString(outputStream.toByteArray(), Base64.DEFAULT)
+                    val base64String = Base64.encodeToString(outputStream.toByteArray(), Base64.NO_WRAP)
                     queryViewModel.setDataOfQueryTerm(queryViewModel.currContainerID, QueryTermType.IMAGE, base64String)
                     getQueryContainerWithId(queryViewModel.currContainerID)?.performClick(QueryTermType.IMAGE)
                 } else if (resultCode == Activity.RESULT_CANCELED) {

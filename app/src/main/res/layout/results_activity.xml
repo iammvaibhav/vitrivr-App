@@ -16,6 +16,7 @@
             app:layout_scrollFlags="scroll|enterAlways">
 
             <ImageView
+                android:id="@+id/view_large"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:onClick="viewLarge"
@@ -61,9 +62,17 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/queryResults"
+    
+    <ProgressBar
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/queryResultsRV"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
 </android.support.design.widget.CoordinatorLayout>

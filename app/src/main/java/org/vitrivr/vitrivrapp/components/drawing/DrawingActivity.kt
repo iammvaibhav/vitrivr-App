@@ -23,6 +23,7 @@ class DrawingActivity : AppCompatActivity(), ColorPickerDialogListener {
 
     private val DIALOG_ID = 1
     private val SELECT_PHOTO = 1
+    private val pixelWidth = 300
     private var lastColor = Color.parseColor("#555555")
 
     companion object {
@@ -43,7 +44,7 @@ class DrawingActivity : AppCompatActivity(), ColorPickerDialogListener {
             val origImage = BitmapFactory.decodeFile(origFile.absolutePath)
             drawingCanvas.setImageBitmap(origImage)
         } else {
-            val bitmap = Bitmap.createBitmap(300.px, 300.px, Bitmap.Config.ARGB_8888)
+            val bitmap = Bitmap.createBitmap(pixelWidth.px, pixelWidth.px, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
             canvas.drawARGB(255, 255, 255, 255)
             drawingCanvas.setImageBitmap(bitmap)
@@ -72,7 +73,7 @@ class DrawingActivity : AppCompatActivity(), ColorPickerDialogListener {
         drawingCanvas.drawable?.let {
             val containerID = intent.getLongExtra("containerID", 0)
 
-            val scaledBitmap = Bitmap.createScaledBitmap((drawingCanvas.drawable as BitmapDrawable).bitmap, 300, 300, false)
+            val scaledBitmap = Bitmap.createScaledBitmap((drawingCanvas.drawable as BitmapDrawable).bitmap, pixelWidth, pixelWidth, false)
             val origBitmap = (drawingCanvas.drawable as BitmapDrawable).bitmap
 
             val dir = filesDir
@@ -106,7 +107,7 @@ class DrawingActivity : AppCompatActivity(), ColorPickerDialogListener {
 
     fun clear(view: View) {
         drawingCanvas.clear()
-        val bitmap = Bitmap.createBitmap(300.px, 300.px, Bitmap.Config.ARGB_8888)
+        val bitmap = Bitmap.createBitmap(pixelWidth.px, pixelWidth.px, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         canvas.drawARGB(255, 255, 255, 255)
         drawingCanvas.setImageBitmap(bitmap)
@@ -119,7 +120,7 @@ class DrawingActivity : AppCompatActivity(), ColorPickerDialogListener {
 
     fun fill(view: View) {
         drawingCanvas.clear()
-        val bitmap = Bitmap.createBitmap(300.px, 300.px, Bitmap.Config.ARGB_8888)
+        val bitmap = Bitmap.createBitmap(pixelWidth.px, pixelWidth.px, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         canvas.drawARGB(Color.alpha(lastColor), Color.red(lastColor), Color.green(lastColor), Color.blue(lastColor))
         drawingCanvas.setImageBitmap(bitmap)
@@ -176,7 +177,7 @@ class DrawingActivity : AppCompatActivity(), ColorPickerDialogListener {
         BitmapFactory.decodeStream(contentResolver.openInputStream(selectedImage), null, o)
 
         // The new size we want to scale to
-        val REQUIRED_SIZE = 150.px
+        val REQUIRED_SIZE = (pixelWidth / 2).px
 
         // Find the correct scale value. It should be the power of 2.
         var width_tmp = o.outWidth
