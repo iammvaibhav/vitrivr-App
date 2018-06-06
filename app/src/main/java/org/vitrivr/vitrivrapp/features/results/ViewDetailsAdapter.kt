@@ -9,19 +9,27 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import com.google.gson.Gson
 import com.squareup.picasso.Picasso
 import org.vitrivr.vitrivrapp.App
 import org.vitrivr.vitrivrapp.R
+import org.vitrivr.vitrivrapp.data.model.enums.MessageType
 import org.vitrivr.vitrivrapp.data.model.enums.ResultViewType
+import org.vitrivr.vitrivrapp.data.model.query.MoreLikeThisQueryModel
 import org.vitrivr.vitrivrapp.data.model.results.QueryResultPresenterModel
 import org.vitrivr.vitrivrapp.utils.format
 import javax.inject.Inject
 
 
-class ViewDetailsAdapter(val initItemsList: List<QueryResultPresenterModel>, val resultViewType: ResultViewType) : RecyclerView.Adapter<ViewDetailsAdapter.Companion.ViewDetailVH>() {
+class ViewDetailsAdapter(initItemsList: List<QueryResultPresenterModel>,
+                         private val resultViewType: ResultViewType,
+                         val resultsViewModel: ResultsViewModel,
+                         val startQuery: (String) -> Unit) : RecyclerView.Adapter<ViewDetailsAdapter.Companion.ViewDetailVH>() {
 
     @Inject
     lateinit var pathUtils: PathUtils
+    @Inject
+    lateinit var gson: Gson
     private val items = mutableListOf<QueryResultPresenterModel>()
 
     init {
@@ -88,6 +96,13 @@ class ViewDetailsAdapter(val initItemsList: List<QueryResultPresenterModel>, val
                     .fit()
                     .centerCrop()
                     .into(holder.previewThumbnail)
+        }
+
+        holder.moreLikeThis.setOnClickListener {
+            val mltQuery = MoreLikeThisQueryModel(items[position].segmentDetail.segmentId,
+                    ArrayList(resultsViewModel.categoryCount[items[position].mediaType]!!.toList()),
+                    MessageType.Q_MLT)
+            startQuery(gson.toJson(mltQuery))
         }
     }
 

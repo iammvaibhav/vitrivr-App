@@ -19,7 +19,7 @@ class ResultsViewModel : ViewModel() {
 
     @Inject
     lateinit var queryResultsRepository: QueryResultsRepository
-    private var categoryCount: HashMap<MediaType, HashSet<String>> = HashMap()
+    var categoryCount: HashMap<MediaType, HashSet<String>> = HashMap()
 
     private val resultPresenterList = ArrayList<QueryResultPresenterModel>()
     private val sortedResultPresenterList = ArrayList<QueryResultPresenterModel>()

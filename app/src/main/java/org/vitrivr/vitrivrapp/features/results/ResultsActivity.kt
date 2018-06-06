@@ -14,9 +14,11 @@ import android.widget.Toast
 import kotlinx.android.synthetic.main.results_activity.*
 import org.vitrivr.vitrivrapp.R
 import org.vitrivr.vitrivrapp.components.results.EqualSpacingItemDecoration
+import org.vitrivr.vitrivrapp.data.model.enums.MediaType
 import org.vitrivr.vitrivrapp.data.model.enums.ResultViewType
 import org.vitrivr.vitrivrapp.data.model.results.QueryResultPresenterModel
 import org.vitrivr.vitrivrapp.utils.px
+import java.util.*
 
 class ResultsActivity : AppCompatActivity() {
 
@@ -25,9 +27,10 @@ class ResultsActivity : AppCompatActivity() {
     val CURRENT_RESULTS = "CURRENT_RESULTS"
     val CURRENT_RESULT_VIEW = "CURRENT_RESULT_VIEW"
     val SAVED_LAYOUT_MANAGER = "SAVED_LAYOUT_MANAGER"
+    val MEDIA_TYPE_CATEGORIES = "MEDIA_TYPE_CATEGORIES"
 
-    val largeViewAdapter by lazy { ViewDetailsAdapter(listOf(), ResultViewType.LARGE) }
-    val mediumViewAdapter by lazy { ViewDetailsAdapter(listOf(), ResultViewType.MEDIUM) }
+    val largeViewAdapter by lazy { ViewDetailsAdapter(listOf(), ResultViewType.LARGE, resultsViewModel, ::startQuery) }
+    val mediumViewAdapter by lazy { ViewDetailsAdapter(listOf(), ResultViewType.MEDIUM, resultsViewModel, ::startQuery) }
     val smallViewAdapter by lazy { ViewSmallAdapter(listOf()) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,6 +51,7 @@ class ResultsActivity : AppCompatActivity() {
                     resultsViewModel.getCurrentResults().value = it.getParcelableArrayList(CURRENT_RESULTS)
                 }
                 resultsViewModel.currResultViewType = it.getSerializable(CURRENT_RESULT_VIEW) as ResultViewType
+                resultsViewModel.categoryCount = it.getSerializable(MEDIA_TYPE_CATEGORIES) as HashMap<MediaType, HashSet<String>>
             }
         }
 
@@ -177,6 +181,7 @@ class ResultsActivity : AppCompatActivity() {
             }
             bundle.putParcelable(SAVED_LAYOUT_MANAGER, queryResultsRV.layoutManager.onSaveInstanceState())
             bundle.putSerializable(CURRENT_RESULT_VIEW, resultsViewModel.currResultViewType)
+            bundle.putSerializable(MEDIA_TYPE_CATEGORIES, resultsViewModel.categoryCount)
         }
     }
 
