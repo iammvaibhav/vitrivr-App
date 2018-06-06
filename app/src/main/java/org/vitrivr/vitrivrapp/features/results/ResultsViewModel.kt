@@ -76,7 +76,8 @@ class ResultsViewModel : ViewModel() {
                     val categoryItem = QueryResultCategoryModel(queryResultSegmentModel!!, queryResultObjectModel!!, queryResultSimilarityModel!!)
                     addToPresenterResults(categoryItem)
                     sortedResultPresenterList.clear()
-                    sortedResultPresenterList.addAll(resultPresenterList)
+                    resultPresenterList.forEach { sortedResultPresenterList.add(it.copy()) } //deep copy required. TODO("Find some better solution")
+                    //sortedResultPresenterList.addAll(resultPresenterList)
                     sortedResultPresenterList.sortByDescending { it.segmentDetail.matchValue }
                     liveResultPresenterList.postValue(sortedResultPresenterList)
                     queryResultSegmentModel = null

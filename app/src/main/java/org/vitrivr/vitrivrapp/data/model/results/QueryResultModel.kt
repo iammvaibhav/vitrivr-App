@@ -77,6 +77,14 @@ data class SegmentDetails(val segmentId: String,
             override fun newArray(size: Int): Array<SegmentDetails?> = arrayOfNulls(size)
         }
     }
+
+    fun copy(): SegmentDetails {
+        val categoriesWeights = HashMap<String, Double>()
+        for ((i, j) in this.categoriesWeights) {
+            categoriesWeights[i] = j
+        }
+        return SegmentDetails(this.segmentId, this.matchValue, categoriesWeights)
+    }
 }
 
 data class QueryResultPresenterModel(val fileName: String,
@@ -115,6 +123,14 @@ data class QueryResultPresenterModel(val fileName: String,
             override fun newArray(size: Int): Array<QueryResultPresenterModel?> = arrayOfNulls(size)
         }
     }
+
+    fun copy(): QueryResultPresenterModel {
+        val allSegments = ArrayList<SegmentDetails>()
+        this.allSegments.forEach { allSegments.add(it.copy()) }
+        return QueryResultPresenterModel(this.fileName, this.filePath, this.mediaType, this.objectId,
+                this.numberOfSegments, this.segmentDetail.copy(), allSegments)
+    }
+
 }
 
 data class QueryResultCategoryModel(val queryResultSegmentModel: QueryResultSegmentModel,
