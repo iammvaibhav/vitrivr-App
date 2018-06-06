@@ -15,12 +15,20 @@ import kotlinx.android.synthetic.main.results_activity.*
 import org.vitrivr.vitrivrapp.R
 import org.vitrivr.vitrivrapp.components.results.EqualSpacingItemDecoration
 import org.vitrivr.vitrivrapp.data.model.enums.ResultViewType
+import org.vitrivr.vitrivrapp.data.model.results.QueryResultPresenterModel
 import org.vitrivr.vitrivrapp.utils.px
 
 class ResultsActivity : AppCompatActivity() {
 
     lateinit var resultsViewModel: ResultsViewModel
-    var currResultViewType = ResultViewType.LARGE
+
+    val CURRENT_RESULTS = "CURRENT_RESULTS"
+    val CURRENT_RESULT_VIEW = "CURRENT_RESULT_VIEW"
+    val SAVED_LAYOUT_MANAGER = "SAVED_LAYOUT_MANAGER"
+
+    val largeViewAdapter by lazy { ViewDetailsAdapter(listOf(), ResultViewType.LARGE) }
+    val mediumViewAdapter by lazy { ViewDetailsAdapter(listOf(), ResultViewType.MEDIUM) }
+    val smallViewAdapter by lazy { ViewSmallAdapter(listOf()) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,15 +36,39 @@ class ResultsActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
-        val queryString = intent.getStringExtra("query")
-        if (queryString == null) {
-            Toast.makeText(this, "Error! No Query Found.", Toast.LENGTH_SHORT).show()
-            finish()
+        resultsViewModel = ViewModelProviders.of(this).get(ResultsViewModel::class.java)
+
+        if (resultsViewModel.isNewViewModel) {
+            resultsViewModel.isNewViewModel = false
+
+            // restore resultsViewModel state if exists
+            savedInstanceState?.let {
+                //TODO("restore resultsViewModel state if exists")
+                if (it.getParcelableArrayList<QueryResultPresenterModel>(CURRENT_RESULTS) != null) {
+                    resultsViewModel.getCurrentResults().value = it.getParcelableArrayList(CURRENT_RESULTS)
+                }
+                resultsViewModel.currResultViewType = it.getSerializable(CURRENT_RESULT_VIEW) as ResultViewType
+            }
         }
 
-        resultsViewModel = ViewModelProviders.of(this).get(ResultsViewModel::class.java)
-        viewLarge(view_large)
-        startQuery(queryString)
+        if (savedInstanceState == null) {
+            val queryString = intent.getStringExtra("query")
+            if (queryString == null) {
+                Toast.makeText(this, "Error! No Query Found.", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+            viewLarge(view_large)
+            startQuery(queryString)
+        } else {
+            //restore UI state
+            queryResultsRV.adapter = getAdapter(resultsViewModel.currResultViewType)
+            when (resultsViewModel.currResultViewType) {
+                ResultViewType.LARGE -> viewLarge(view_large)
+                ResultViewType.MEDIUM -> viewMedium(view_medium)
+                ResultViewType.SMALL -> viewSmall(view_small)
+            }
+            queryResultsRV.layoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(SAVED_LAYOUT_MANAGER))
+        }
     }
 
     private fun startQuery(query: String) {
@@ -46,16 +78,19 @@ class ResultsActivity : AppCompatActivity() {
         queryResults.observe(this, Observer {
             it?.let {
                 if (queryResultsRV.adapter == null) {
-                    if (currResultViewType == ResultViewType.LARGE || currResultViewType == ResultViewType.MEDIUM) {
-                        queryResultsRV.adapter = ViewDetailsAdapter(it, currResultViewType)
+                    if (resultsViewModel.currResultViewType == ResultViewType.LARGE || resultsViewModel.currResultViewType == ResultViewType.MEDIUM) {
+                        queryResultsRV.adapter = getAdapter(resultsViewModel.currResultViewType)
+                        (queryResultsRV.adapter as ViewDetailsAdapter).swap(it)
                     } else {
-                        queryResultsRV.adapter = ViewSmallAdapter(it)
+                        queryResultsRV.adapter = getAdapter(ResultViewType.SMALL)
+                        (queryResultsRV.adapter as ViewSmallAdapter).swap(it)
                     }
                 } else {
-                    /*val diffResult = DiffUtil.calculateDiff(GradualQueryResultsCallback((queryResultsRV.adapter as ViewDetailsAdapter).items, it))
-                    diffResult.dispatchUpdatesTo(queryResultsRV.adapter)*/
-                    queryResultsRV.adapter.notifyDataSetChanged()
-                    //TODO(Use diffUtil to update items instead of notifyDataSetChange)
+                    if (resultsViewModel.currResultViewType == ResultViewType.LARGE || resultsViewModel.currResultViewType == ResultViewType.MEDIUM) {
+                        (queryResultsRV.adapter as ViewDetailsAdapter).swap(it)
+                    } else {
+                        (queryResultsRV.adapter as ViewSmallAdapter).swap(it)
+                    }
                 }
             }
         })
@@ -81,12 +116,15 @@ class ResultsActivity : AppCompatActivity() {
         }
         queryResultsRV.addItemDecoration(EqualSpacingItemDecoration(8.px, EqualSpacingItemDecoration.VERTICAL))
         queryResultsRV.layoutManager = LinearLayoutManager(this)
+
         if (queryResultsRV.adapter != null) {
-            if (currResultViewType == ResultViewType.MEDIUM || currResultViewType == ResultViewType.LARGE)
-                queryResultsRV.adapter = ViewDetailsAdapter((queryResultsRV.adapter as ViewDetailsAdapter).items, ResultViewType.LARGE)
-            else queryResultsRV.adapter = ViewDetailsAdapter((queryResultsRV.adapter as ViewSmallAdapter).items, ResultViewType.LARGE)
+            queryResultsRV.adapter = getAdapter(ResultViewType.LARGE)
+            resultsViewModel.getCurrentResults().value?.let {
+                (queryResultsRV.adapter as ViewDetailsAdapter).swap(it)
+            }
         }
-        currResultViewType = ResultViewType.LARGE
+
+        resultsViewModel.currResultViewType = ResultViewType.LARGE
     }
 
     fun viewMedium(view: View) {
@@ -96,12 +134,14 @@ class ResultsActivity : AppCompatActivity() {
         }
         queryResultsRV.addItemDecoration(EqualSpacingItemDecoration(8.px, EqualSpacingItemDecoration.GRID))
         queryResultsRV.layoutManager = GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false)
+
         if (queryResultsRV.adapter != null) {
-            if (currResultViewType == ResultViewType.MEDIUM || currResultViewType == ResultViewType.LARGE)
-                queryResultsRV.adapter = ViewDetailsAdapter((queryResultsRV.adapter as ViewDetailsAdapter).items, ResultViewType.MEDIUM)
-            else queryResultsRV.adapter = ViewDetailsAdapter((queryResultsRV.adapter as ViewSmallAdapter).items, ResultViewType.MEDIUM)
+            queryResultsRV.adapter = getAdapter(ResultViewType.MEDIUM)
+            resultsViewModel.getCurrentResults().value?.let {
+                (queryResultsRV.adapter as ViewDetailsAdapter).swap(it)
+            }
         }
-        currResultViewType = ResultViewType.MEDIUM
+        resultsViewModel.currResultViewType = ResultViewType.MEDIUM
     }
 
     fun viewSmall(view: View) {
@@ -111,12 +151,14 @@ class ResultsActivity : AppCompatActivity() {
         }
         queryResultsRV.addItemDecoration(EqualSpacingItemDecoration(8.px, EqualSpacingItemDecoration.GRID))
         queryResultsRV.layoutManager = GridLayoutManager(this, 3, GridLayoutManager.VERTICAL, false)
+
         if (queryResultsRV.adapter != null) {
-            if (currResultViewType == ResultViewType.MEDIUM || currResultViewType == ResultViewType.LARGE)
-                queryResultsRV.adapter = ViewSmallAdapter((queryResultsRV.adapter as ViewDetailsAdapter).items)
-            else queryResultsRV.adapter = ViewSmallAdapter((queryResultsRV.adapter as ViewSmallAdapter).items)
+            queryResultsRV.adapter = getAdapter(ResultViewType.SMALL)
+            resultsViewModel.getCurrentResults().value?.let {
+                (queryResultsRV.adapter as ViewSmallAdapter).swap(it)
+            }
         }
-        currResultViewType = ResultViewType.SMALL
+        resultsViewModel.currResultViewType = ResultViewType.SMALL
     }
 
     private fun select(view: ImageView) {
@@ -125,4 +167,23 @@ class ResultsActivity : AppCompatActivity() {
         view_small.setColorFilter(Color.WHITE)
         view.setColorFilter(ContextCompat.getColor(this, R.color.colorPrimaryDark))
     }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+
+        outState?.let { bundle ->
+            resultsViewModel.getCurrentResults().value?.let {
+                bundle.putParcelableArrayList(CURRENT_RESULTS, it as ArrayList<QueryResultPresenterModel>)
+            }
+            bundle.putParcelable(SAVED_LAYOUT_MANAGER, queryResultsRV.layoutManager.onSaveInstanceState())
+            bundle.putSerializable(CURRENT_RESULT_VIEW, resultsViewModel.currResultViewType)
+        }
+    }
+
+    private fun getAdapter(resultViewType: ResultViewType) = when (resultViewType) {
+        ResultViewType.LARGE -> largeViewAdapter
+        ResultViewType.MEDIUM -> mediumViewAdapter
+        ResultViewType.SMALL -> smallViewAdapter
+    }
+
 }

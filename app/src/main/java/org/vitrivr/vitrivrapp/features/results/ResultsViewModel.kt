@@ -8,6 +8,7 @@ import io.reactivex.functions.Consumer
 import org.vitrivr.vitrivrapp.App
 import org.vitrivr.vitrivrapp.data.model.enums.MediaType
 import org.vitrivr.vitrivrapp.data.model.enums.MessageType
+import org.vitrivr.vitrivrapp.data.model.enums.ResultViewType
 import org.vitrivr.vitrivrapp.data.model.results.*
 import org.vitrivr.vitrivrapp.data.repository.QueryResultsRepository
 import java.util.*
@@ -30,6 +31,8 @@ class ResultsViewModel : ViewModel() {
     private var queryResultObjectModel: QueryResultObjectModel? = null
     private var queryResultSimilarityModel: QueryResultSimilarityModel? = null
 
+    var isNewViewModel = true
+    var currResultViewType = ResultViewType.LARGE
 
     private val queryResultObserver = Consumer<QueryResultBaseModel> {
 
@@ -99,6 +102,8 @@ class ResultsViewModel : ViewModel() {
         }, Action { closed() })
         return liveResultPresenterList
     }
+
+    fun getCurrentResults() = liveResultPresenterList
 
     private fun addToPresenterResults(categoryItem: QueryResultCategoryModel) {
         val category = categoryItem.queryResultSimilarityModel.category
@@ -195,6 +200,4 @@ class ResultsViewModel : ViewModel() {
             presenterObject.numberOfSegments = presenterObject.allSegments.size
         }
     }
-
-    fun getDirectoryPath() = queryResultsRepository.getDirectoryPath()
 }

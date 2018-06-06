@@ -2,6 +2,7 @@ package org.vitrivr.vitrivrapp.features.results
 
 import android.graphics.Typeface
 import android.support.v7.app.AlertDialog
+import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -17,13 +18,15 @@ import org.vitrivr.vitrivrapp.utils.format
 import javax.inject.Inject
 
 
-class ViewDetailsAdapter(val items: List<QueryResultPresenterModel>, val resultViewType: ResultViewType) : RecyclerView.Adapter<ViewDetailsAdapter.Companion.ViewDetailVH>() {
+class ViewDetailsAdapter(val initItemsList: List<QueryResultPresenterModel>, val resultViewType: ResultViewType) : RecyclerView.Adapter<ViewDetailsAdapter.Companion.ViewDetailVH>() {
 
     @Inject
     lateinit var pathUtils: PathUtils
+    private val items = mutableListOf<QueryResultPresenterModel>()
 
     init {
         App.daggerAppComponent.inject(this)
+        items.addAll(initItemsList)
     }
 
     companion object {
@@ -86,5 +89,14 @@ class ViewDetailsAdapter(val items: List<QueryResultPresenterModel>, val resultV
                     .centerCrop()
                     .into(holder.previewThumbnail)
         }
+    }
+
+    fun swap(items: List<QueryResultPresenterModel>) {
+        val diffCallback = GradualQueryResultsCallback(this.items, items)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
+
+        this.items.clear()
+        this.items.addAll(items)
+        diffResult.dispatchUpdatesTo(this)
     }
 }

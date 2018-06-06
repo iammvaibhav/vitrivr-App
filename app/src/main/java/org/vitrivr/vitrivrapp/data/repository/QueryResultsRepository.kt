@@ -23,8 +23,4 @@ class QueryResultsRepository {
         return queryResultsService.getQueryResults(query,
                 "ws://${serverSettings?.address}:${serverSettings?.port}/api/v1")
     }
-
-    fun getDirectoryPath(): String {
-        return "http://${settingsService.getServerSettings()?.address}:8081/data/image/"
-    }
 }
