@@ -1,5 +1,6 @@
 package org.vitrivr.vitrivrapp.features.results
 
+import android.content.Intent
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -9,10 +10,12 @@ import android.widget.ImageView
 import com.squareup.picasso.Picasso
 import org.vitrivr.vitrivrapp.App
 import org.vitrivr.vitrivrapp.R
+import org.vitrivr.vitrivrapp.data.model.enums.MediaType
 import org.vitrivr.vitrivrapp.data.model.results.QueryResultPresenterModel
+import org.vitrivr.vitrivrapp.features.resultdetails.ImageResultDetailActivity
 import javax.inject.Inject
 
-class ViewSmallAdapter(val initItemsList: List<QueryResultPresenterModel>) : RecyclerView.Adapter<ViewSmallAdapter.Companion.ViewSmallVH>() {
+class ViewSmallAdapter(initItemsList: List<QueryResultPresenterModel>, val resultsViewModel: ResultsViewModel) : RecyclerView.Adapter<ViewSmallAdapter.Companion.ViewSmallVH>() {
 
     @Inject
     lateinit var pathUtils: PathUtils
@@ -45,16 +48,28 @@ class ViewSmallAdapter(val initItemsList: List<QueryResultPresenterModel>) : Rec
                         .centerCrop()
                         .into(holder.previewThumbnail)
             }
-            return
+        } else if (pathUtils.isThumbnailPathLocal() == false) {
+            pathUtils.getThumbnailCompletePath(items[position])?.let {
+                Picasso.get()
+                        .load(it)
+                        .fit()
+                        .centerCrop()
+                        .into(holder.previewThumbnail)
+            }
         }
 
-        pathUtils.getThumbnailCompletePath(items[position])?.let {
-            Picasso.get()
-                    .load(it)
-                    .fit()
-                    .centerCrop()
-                    .into(holder.previewThumbnail)
+        val openDetailsListener = View.OnClickListener {
+            when (items[position].mediaType) {
+                MediaType.IMAGE -> {
+                    val intent = Intent(holder.itemView.context, ImageResultDetailActivity::class.java)
+                    intent.putExtra(ViewDetailsAdapter.PRESENTER_OBJECT, items[position])
+                    intent.putExtra(ViewDetailsAdapter.CATEGORY_INFO, resultsViewModel.categoryCount)
+                    holder.itemView.context.startActivity(intent)
+                }
+            }
         }
+
+        holder.previewThumbnail.setOnClickListener(openDetailsListener)
     }
 
     fun swap(items: List<QueryResultPresenterModel>) {

@@ -31,7 +31,7 @@ class ResultsActivity : AppCompatActivity() {
 
     val largeViewAdapter by lazy { ViewDetailsAdapter(listOf(), ResultViewType.LARGE, resultsViewModel, ::startQuery) }
     val mediumViewAdapter by lazy { ViewDetailsAdapter(listOf(), ResultViewType.MEDIUM, resultsViewModel, ::startQuery) }
-    val smallViewAdapter by lazy { ViewSmallAdapter(listOf()) }
+    val smallViewAdapter by lazy { ViewSmallAdapter(listOf(), resultsViewModel) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

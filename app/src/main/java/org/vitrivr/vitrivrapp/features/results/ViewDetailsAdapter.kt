@@ -1,5 +1,6 @@
 package org.vitrivr.vitrivrapp.features.results
 
+import android.content.Intent
 import android.graphics.Typeface
 import android.support.v7.app.AlertDialog
 import android.support.v7.util.DiffUtil
@@ -13,10 +14,12 @@ import com.google.gson.Gson
 import com.squareup.picasso.Picasso
 import org.vitrivr.vitrivrapp.App
 import org.vitrivr.vitrivrapp.R
+import org.vitrivr.vitrivrapp.data.model.enums.MediaType
 import org.vitrivr.vitrivrapp.data.model.enums.MessageType
 import org.vitrivr.vitrivrapp.data.model.enums.ResultViewType
 import org.vitrivr.vitrivrapp.data.model.query.MoreLikeThisQueryModel
 import org.vitrivr.vitrivrapp.data.model.results.QueryResultPresenterModel
+import org.vitrivr.vitrivrapp.features.resultdetails.ImageResultDetailActivity
 import org.vitrivr.vitrivrapp.utils.format
 import javax.inject.Inject
 
@@ -46,6 +49,9 @@ class ViewDetailsAdapter(initItemsList: List<QueryResultPresenterModel>,
             val details = view.findViewById<ImageView>(R.id.details)
             val moreLikeThis = view.findViewById<ImageView>(R.id.moreLikeThis)
         }
+
+        const val PRESENTER_OBJECT = "PRESENTER_OBJECT"
+        const val CATEGORY_INFO = "CATEGORY_INFO"
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewDetailVH {
@@ -87,15 +93,14 @@ class ViewDetailsAdapter(initItemsList: List<QueryResultPresenterModel>,
                         .centerCrop()
                         .into(holder.previewThumbnail)
             }
-            return
-        }
-
-        pathUtils.getThumbnailCompletePath(items[position])?.let {
-            Picasso.get()
-                    .load(it)
-                    .fit()
-                    .centerCrop()
-                    .into(holder.previewThumbnail)
+        } else if (pathUtils.isThumbnailPathLocal() == false) {
+            pathUtils.getThumbnailCompletePath(items[position])?.let {
+                Picasso.get()
+                        .load(it)
+                        .fit()
+                        .centerCrop()
+                        .into(holder.previewThumbnail)
+            }
         }
 
         holder.moreLikeThis.setOnClickListener {
@@ -104,6 +109,20 @@ class ViewDetailsAdapter(initItemsList: List<QueryResultPresenterModel>,
                     MessageType.Q_MLT)
             startQuery(gson.toJson(mltQuery))
         }
+
+        val openDetailsListener = View.OnClickListener {
+            when (items[position].mediaType) {
+                MediaType.IMAGE -> {
+                    val intent = Intent(holder.itemView.context, ImageResultDetailActivity::class.java)
+                    intent.putExtra(PRESENTER_OBJECT, items[position])
+                    intent.putExtra(CATEGORY_INFO, resultsViewModel.categoryCount)
+                    holder.itemView.context.startActivity(intent)
+                }
+            }
+        }
+
+        holder.previewThumbnail.setOnClickListener(openDetailsListener)
+        holder.details.setOnClickListener(openDetailsListener)
     }
 
     fun swap(items: List<QueryResultPresenterModel>) {

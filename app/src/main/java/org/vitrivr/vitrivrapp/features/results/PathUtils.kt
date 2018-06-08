@@ -1,5 +1,6 @@
 package org.vitrivr.vitrivrapp.features.results
 
+import android.net.Uri
 import org.vitrivr.vitrivrapp.App
 import org.vitrivr.vitrivrapp.data.model.enums.MediaType
 import org.vitrivr.vitrivrapp.data.model.results.QueryResultPresenterModel
@@ -31,10 +32,10 @@ class PathUtils {
         val prePath = settingsService.getResourcesSettings()?.objectsURL ?: return null
 
         return when (item.mediaType) {
-            MediaType.IMAGE -> "$prePath/image/${item.filePath}.${objectExtensions[item.mediaType]}"
-            MediaType.VIDEO -> "$prePath/video/${item.filePath}.${objectExtensions[item.mediaType]}"
-            MediaType.AUDIO -> "$prePath/audio/${item.filePath}.${objectExtensions[item.mediaType]}"
-            MediaType.MODEL3D -> "$prePath/model3d/${item.filePath}.${objectExtensions[item.mediaType]}"
+            MediaType.IMAGE -> "$prePath/image/${item.filePath}"
+            MediaType.VIDEO -> "$prePath/video/${item.filePath}"
+            MediaType.AUDIO -> "$prePath/audio/${item.filePath}"
+            MediaType.MODEL3D -> "$prePath/model3d/${item.filePath}"
         }
     }
 
@@ -47,6 +48,28 @@ class PathUtils {
             MediaType.AUDIO -> "$prePath/audio/${item.objectId}/${item.segmentDetail.segmentId}.${thumbnailsExtensions[item.mediaType]}"
             MediaType.MODEL3D -> "$prePath/model3d/${item.objectId}/${item.segmentDetail.segmentId}.${thumbnailsExtensions[item.mediaType]}"
         }
+    }
+
+    fun getThumbnailOfSegment(mediaType: MediaType, objectId: String, segmentId: String): String? {
+        val prePath = settingsService.getResourcesSettings()?.thumbnailsURL ?: return null
+
+        return when (mediaType) {
+            MediaType.IMAGE -> "$prePath/image/$objectId/$segmentId.${thumbnailsExtensions[mediaType]}"
+            MediaType.VIDEO -> "$prePath/video/$objectId/$segmentId.${thumbnailsExtensions[mediaType]}"
+            MediaType.AUDIO -> "$prePath/audio/$objectId/$segmentId.${thumbnailsExtensions[mediaType]}"
+            MediaType.MODEL3D -> "$prePath/model3d/$objectId/$segmentId.${thumbnailsExtensions[mediaType]}"
+        }
+    }
+
+    fun getObjectURI(presenterObject: QueryResultPresenterModel): Uri? {
+        val path: String = getObjectCompletePath(presenterObject)!!
+
+        if (isObjectPathLocal() == true) {
+            return Uri.parse("file://${File(path).absolutePath}")
+        } else if (isObjectPathLocal() == false) {
+            return Uri.parse(path)
+        }
+        return null
     }
 
     fun isObjectPathLocal(): Boolean? {
@@ -67,6 +90,11 @@ class PathUtils {
     fun getFileOfThumbnail(item: QueryResultPresenterModel): File? {
         if (isThumbnailPathLocal() == null || isThumbnailPathLocal() == false) return null
         return File(getThumbnailCompletePath(item))
+    }
+
+    fun getFileOfThumbnail(mediaType: MediaType, objectId: String, segmentId: String): File? {
+        if (isThumbnailPathLocal() == null || isThumbnailPathLocal() == false) return null
+        return File(getThumbnailOfSegment(mediaType, objectId, segmentId))
     }
 
 }

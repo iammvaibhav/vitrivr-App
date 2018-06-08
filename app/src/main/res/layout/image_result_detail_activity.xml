@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.github.piasy.biv.view.BigImageView
+        android:id="@+id/bigImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black"
+        app:failureImage="@drawable/ic_cloud_off_white"
+        app:failureImageInitScaleType="center"
+        app:optimizeDisplay="true" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_margin="12dp"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:onClick="info"
+            android:src="@drawable/icon_info"
+            android:tint="@android:color/white" />
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginLeft="8dp"
+            android:onClick="save"
+            android:src="@drawable/icon_save"
+            android:tint="@android:color/white" />
+
+    </LinearLayout>
+
+</FrameLayout>

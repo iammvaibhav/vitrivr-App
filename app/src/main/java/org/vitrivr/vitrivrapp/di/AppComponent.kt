@@ -4,6 +4,8 @@ import dagger.Component
 import org.vitrivr.vitrivrapp.data.helper.SharedPreferenceHelper
 import org.vitrivr.vitrivrapp.data.repository.QueryResultsRepository
 import org.vitrivr.vitrivrapp.features.query.QueryViewModel
+import org.vitrivr.vitrivrapp.features.resultdetails.AllSegmentsAdapter
+import org.vitrivr.vitrivrapp.features.resultdetails.ImageResultDetailActivity
 import org.vitrivr.vitrivrapp.features.results.PathUtils
 import org.vitrivr.vitrivrapp.features.results.ResultsViewModel
 import org.vitrivr.vitrivrapp.features.results.ViewDetailsAdapter
@@ -23,5 +25,7 @@ interface AppComponent {
     fun inject(pathUtils: PathUtils)
     fun inject(viewSmallAdapter: ViewSmallAdapter)
     fun inject(viewDetailsAdapter: ViewDetailsAdapter)
+    fun inject(imageResultDetailActivity: ImageResultDetailActivity)
+    fun inject(allSegmentsAdapter: AllSegmentsAdapter)
 
 }

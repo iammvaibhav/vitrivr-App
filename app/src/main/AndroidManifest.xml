@@ -25,6 +25,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".features.results.ResultsActivity" />
+        <activity android:name=".features.resultdetails.ImageResultDetailActivity"></activity>
         <activity
             android:name=".components.drawing.DrawingActivity"
             android:parentActivityName=".features.query.QueryActivity"></activity>
