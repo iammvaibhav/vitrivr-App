@@ -21,7 +21,8 @@ import javax.inject.Inject
 class AllSegmentsAdapter(val allSegments: List<SegmentDetails>,
                          val objectId: String,
                          val mediaType: MediaType,
-                         val categoryInfo: HashMap<MediaType, HashSet<String>>) : RecyclerView.Adapter<AllSegmentsAdapter.Companion.AllSegmentsVH>() {
+                         val categoryInfo: HashMap<MediaType, HashSet<String>>,
+                         val segmentClickListener: ((Double) -> Unit)? = null) : RecyclerView.Adapter<AllSegmentsAdapter.Companion.AllSegmentsVH>() {
 
     @Inject
     lateinit var pathUtils: PathUtils
@@ -36,12 +37,17 @@ class AllSegmentsAdapter(val allSegments: List<SegmentDetails>,
         class AllSegmentsVH(view: View) : RecyclerView.ViewHolder(view) {
             val previewImage = view.findViewById<ImageView>(R.id.previewImage)
             val moreLikeThis = view.findViewById<ImageView>(R.id.moreLikeThis)
+            val play = view.findViewById<ImageView>(R.id.play)
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AllSegmentsVH {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.segment_with_mlt, parent, false)
-        return AllSegmentsVH(view)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.segment_mlt_play, parent, false)
+        val vh = AllSegmentsVH(view)
+        when (mediaType) {
+            MediaType.VIDEO -> vh.play.visibility = View.VISIBLE
+        }
+        return vh
     }
 
     override fun getItemCount() = allSegments.size
@@ -74,6 +80,14 @@ class AllSegmentsAdapter(val allSegments: List<SegmentDetails>,
                     MessageType.Q_MLT)
             intent.putExtra("query", gson.toJson(mltQuery))
             holder.itemView.context.startActivity(intent)
+        }
+
+        when (mediaType) {
+            MediaType.VIDEO -> {
+                holder.play.setOnClickListener {
+                    segmentClickListener?.invoke(allSegments[position].startAbs)
+                }
+            }
         }
     }
 }

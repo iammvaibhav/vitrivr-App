@@ -29,6 +29,9 @@
         <activity
             android:name=".components.drawing.DrawingActivity"
             android:parentActivityName=".features.query.QueryActivity"></activity>
+        <activity
+            android:name=".features.resultdetails.VideoResultDetailActivity"
+            android:configChanges="orientation|screenSize|layoutDirection"></activity>
     </application>
 
 </manifest>

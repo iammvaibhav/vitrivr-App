@@ -21,8 +21,8 @@ data class SegmentModel(val segmentId: String,
                         val objectId: String,
                         val start: Int,
                         val end: Int,
-                        val startabs: Int,
-                        val endabs: Int,
+                        val startabs: Double,
+                        val endabs: Double,
                         val count: Int,
                         val sequenceNumber: Int)
 
@@ -55,9 +55,11 @@ data class QueryServerStatusModel(override val messageType: MessageType, val sta
 
 data class SegmentDetails(val segmentId: String,
                           var matchValue: Double,
+                          val startAbs: Double,
                           val categoriesWeights: HashMap<String, Double>) : Parcelable {
     constructor(source: Parcel) : this(
             source.readString(),
+            source.readDouble(),
             source.readDouble(),
             source.readSerializable() as HashMap<String, Double>
     )
@@ -67,6 +69,7 @@ data class SegmentDetails(val segmentId: String,
     override fun writeToParcel(dest: Parcel, flags: Int) = with(dest) {
         writeString(segmentId)
         writeDouble(matchValue)
+        writeDouble(startAbs)
         writeSerializable(categoriesWeights)
     }
 
@@ -83,7 +86,7 @@ data class SegmentDetails(val segmentId: String,
         for ((i, j) in this.categoriesWeights) {
             categoriesWeights[i] = j
         }
-        return SegmentDetails(this.segmentId, this.matchValue, categoriesWeights)
+        return SegmentDetails(this.segmentId, this.matchValue, this.startAbs, categoriesWeights)
     }
 }
 

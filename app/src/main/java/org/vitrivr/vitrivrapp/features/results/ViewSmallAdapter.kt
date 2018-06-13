@@ -13,6 +13,7 @@ import org.vitrivr.vitrivrapp.R
 import org.vitrivr.vitrivrapp.data.model.enums.MediaType
 import org.vitrivr.vitrivrapp.data.model.results.QueryResultPresenterModel
 import org.vitrivr.vitrivrapp.features.resultdetails.ImageResultDetailActivity
+import org.vitrivr.vitrivrapp.features.resultdetails.VideoResultDetailActivity
 import javax.inject.Inject
 
 class ViewSmallAdapter(initItemsList: List<QueryResultPresenterModel>, val resultsViewModel: ResultsViewModel) : RecyclerView.Adapter<ViewSmallAdapter.Companion.ViewSmallVH>() {
@@ -59,14 +60,15 @@ class ViewSmallAdapter(initItemsList: List<QueryResultPresenterModel>, val resul
         }
 
         val openDetailsListener = View.OnClickListener {
-            when (items[position].mediaType) {
-                MediaType.IMAGE -> {
-                    val intent = Intent(holder.itemView.context, ImageResultDetailActivity::class.java)
-                    intent.putExtra(ViewDetailsAdapter.PRESENTER_OBJECT, items[position])
-                    intent.putExtra(ViewDetailsAdapter.CATEGORY_INFO, resultsViewModel.categoryCount)
-                    holder.itemView.context.startActivity(intent)
-                }
+            val intent = when (items[position].mediaType) {
+                MediaType.IMAGE -> Intent(holder.itemView.context, ImageResultDetailActivity::class.java)
+                MediaType.VIDEO -> Intent(holder.itemView.context, VideoResultDetailActivity::class.java)
+                else -> TODO()
             }
+
+            intent.putExtra(ViewDetailsAdapter.PRESENTER_OBJECT, items[position])
+            intent.putExtra(ViewDetailsAdapter.CATEGORY_INFO, resultsViewModel.categoryCount)
+            holder.itemView.context.startActivity(intent)
         }
 
         holder.previewThumbnail.setOnClickListener(openDetailsListener)

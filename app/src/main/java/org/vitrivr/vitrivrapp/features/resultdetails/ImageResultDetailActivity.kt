@@ -138,7 +138,7 @@ class ImageResultDetailActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         if (permissions.isNotEmpty() && requestCode == WRITE_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            bigImage.saveImageIntoGallery()
+
         }
     }
 }

@@ -8,6 +8,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
@@ -57,6 +58,7 @@ class ResultsActivity : AppCompatActivity() {
 
         if (savedInstanceState == null) {
             val queryString = intent.getStringExtra("query")
+            Log.e("queryString", queryString)
             if (queryString == null) {
                 Toast.makeText(this, "Error! No Query Found.", Toast.LENGTH_SHORT).show()
                 finish()

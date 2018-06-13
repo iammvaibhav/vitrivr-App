@@ -124,7 +124,7 @@ class ResultsViewModel : ViewModel() {
              * Using dummy object while filling all segments info. It will be replaced by actual object
              * at the end.
              */
-            val dummySegmentObject = SegmentDetails("", 0.0, HashMap())
+            val dummySegmentObject = SegmentDetails("", 0.0, 0.0, HashMap())
 
             val segmentObject = objectMap[segment.objectId]
             val segmentWeight = categoryWeight[segment.segmentId]
@@ -138,7 +138,7 @@ class ResultsViewModel : ViewModel() {
                             segmentObject.mediatype, segment.objectId,
                             0, dummySegmentObject, ArrayList())
 
-                    val segmentDetails = SegmentDetails(segment.segmentId, 0.0, HashMap())
+                    val segmentDetails = SegmentDetails(segment.segmentId, 0.0, segment.startabs, HashMap())
                     segmentDetails.categoriesWeights[category] = segmentWeight
 
                     presenterItem.allSegments.add(segmentDetails)
@@ -173,7 +173,7 @@ class ResultsViewModel : ViewModel() {
                     }
 
                     if (!isThisSegmentPresent) {
-                        val segmentDetails = SegmentDetails(segment.segmentId, 0.0, HashMap())
+                        val segmentDetails = SegmentDetails(segment.segmentId, 0.0, segment.startabs, HashMap())
                         segmentDetails.categoriesWeights[category] = segmentWeight
                         presenterItem.allSegments.add(segmentDetails)
                     }
