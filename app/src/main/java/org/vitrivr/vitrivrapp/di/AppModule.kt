@@ -5,7 +5,6 @@ import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
-import org.vitrivr.vitrivrapp.data.repository.QueryResultsRepository
 import org.vitrivr.vitrivrapp.features.results.PathUtils
 import javax.inject.Singleton
 
@@ -23,10 +22,6 @@ class AppModule(val applicationContext: Context) {
     @Singleton
     @Provides
     fun provideOkHttpClient() = OkHttpClient()
-
-    @Singleton
-    @Provides
-    fun provideQueryResultsRepository() = QueryResultsRepository()
 
     @Singleton
     @Provides

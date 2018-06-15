@@ -3,13 +3,17 @@ package org.vitrivr.vitrivrapp.features.results
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import io.reactivex.functions.Action
 import io.reactivex.functions.Consumer
 import org.vitrivr.vitrivrapp.App
 import org.vitrivr.vitrivrapp.data.model.enums.MediaType
 import org.vitrivr.vitrivrapp.data.model.enums.MessageType
 import org.vitrivr.vitrivrapp.data.model.enums.ResultViewType
+import org.vitrivr.vitrivrapp.data.model.query.QueryModel
 import org.vitrivr.vitrivrapp.data.model.results.*
+import org.vitrivr.vitrivrapp.data.repository.QueryRepository
 import org.vitrivr.vitrivrapp.data.repository.QueryResultsRepository
 import java.util.*
 import javax.inject.Inject
@@ -19,6 +23,11 @@ class ResultsViewModel : ViewModel() {
 
     @Inject
     lateinit var queryResultsRepository: QueryResultsRepository
+    @Inject
+    lateinit var queryRepository: QueryRepository
+    @Inject
+    lateinit var gson: Gson
+
     var categoryCount: HashMap<MediaType, HashSet<String>> = HashMap()
 
     private val resultPresenterList = ArrayList<QueryResultPresenterModel>()
@@ -200,5 +209,19 @@ class ResultsViewModel : ViewModel() {
             presenterObject.segmentDetail = segmentDetailObject!!
             presenterObject.numberOfSegments = presenterObject.allSegments.size
         }
+    }
+
+    fun queryToJson(): String {
+        return gson.toJson(queryRepository.getQueryObject(), object : TypeToken<QueryModel>() {}.type)
+    }
+
+    fun saveCurrentPresenterResults() {
+        getCurrentResults().value?.let {
+            queryResultsRepository.putCurrentPresenterResults(it)
+        }
+    }
+
+    fun restoreCurrentPresenterResults() {
+        getCurrentResults().value = queryResultsRepository.getCurrentPresenterResults()
     }
 }

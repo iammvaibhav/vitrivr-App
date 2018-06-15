@@ -1,6 +1,5 @@
 package org.vitrivr.vitrivrapp.data.services
 
-import android.util.Log
 import com.google.gson.Gson
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -45,7 +44,6 @@ class QueryResultsService @Inject constructor(val okHttpClient: OkHttpClient, va
 
         override fun onMessage(webSocket: WebSocket?, text: String?) {
             super.onMessage(webSocket, text)
-            Log.e("message", text)
             text?.let {
                 val baseQueryHelper = gson.fromJson<QueryResultBaseHelperModel>(it, QueryResultBaseHelperModel::class.java)
                 val baseQuery = object : QueryResultBaseModel() {

@@ -2,19 +2,22 @@ package org.vitrivr.vitrivrapp.features.query
 
 import android.arch.lifecycle.ViewModel
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import org.vitrivr.vitrivrapp.App
 import org.vitrivr.vitrivrapp.data.model.enums.MessageType
 import org.vitrivr.vitrivrapp.data.model.enums.QueryTermType
 import org.vitrivr.vitrivrapp.data.model.query.QueryContainerModel
 import org.vitrivr.vitrivrapp.data.model.query.QueryModel
 import org.vitrivr.vitrivrapp.data.model.query.QueryTermModel
+import org.vitrivr.vitrivrapp.data.repository.QueryRepository
 import javax.inject.Inject
 
 class QueryViewModel : ViewModel() {
 
+
     @Inject
     lateinit var gson: Gson
+    @Inject
+    lateinit var queryRepository: QueryRepository
 
     var query = QueryModel(MessageType.Q_SIM, ArrayList())
     var currContainerID = 0L
@@ -176,7 +179,13 @@ class QueryViewModel : ViewModel() {
         return 0
     }
 
-    fun queryToJson(): String {
-        return gson.toJson(query, object : TypeToken<QueryModel>() {}.type)
+    fun saveQueryObject() {
+        queryRepository.putQueryObject(query)
+    }
+
+    fun restoreQueryObject() {
+        queryRepository.getQueryObject()?.let {
+            this.query = it
+        }
     }
 }

@@ -13,16 +13,10 @@ class PathUtils {
     @Inject
     lateinit var settingsService: SettingsService
 
-    private val objectExtensions = hashMapOf(Pair(MediaType.IMAGE, "jpg"),
-            Pair(MediaType.VIDEO, "mp4")
-            /*,Pair(MediaType.AUDIO, "wav"),
-            Pair(MediaType.MODEL3D, "obj")*/)
-    //TODO("Adding for audio and model3d")
-
     private val thumbnailsExtensions = hashMapOf(Pair(MediaType.IMAGE, "png"),
-            Pair(MediaType.VIDEO, "png")
-            /*,Pair(MediaType.AUDIO, "wav"),
-            Pair(MediaType.MODEL3D, "obj")*/)
+            Pair(MediaType.VIDEO, "png"),
+            Pair(MediaType.AUDIO, "jpg"),
+            Pair(MediaType.MODEL3D, "jpg"))
 
     init {
         App.daggerAppComponent.inject(this)

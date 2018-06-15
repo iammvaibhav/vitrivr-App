@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import com.google.gson.Gson
-import com.google.gson.JsonSyntaxException
+import com.google.gson.reflect.TypeToken
 import org.vitrivr.vitrivrapp.App
 import javax.inject.Inject
 
@@ -30,10 +30,17 @@ class SharedPreferenceHelper(context: Context, prefName: String) {
 
     fun <T> getObject(key: String, classOfT: Class<T>) : T? {
         val json = getString(key)
-        try {
-            return gson.fromJson<T>(json, classOfT)
-        } catch (e: JsonSyntaxException) {
-            return null
-        }
+        return gson.fromJson<T>(json, classOfT)
     }
+
+    fun <T> putListObject(key: String, list: List<T>) {
+        putString(key, gson.toJson(list))
+    }
+
+    fun <T> getObjectList(key: String): List<T>? {
+        val json = getString(key)
+        return gson.fromJson(json, object : TypeToken<List<T>>() {}.type)
+    }
+
+
 }

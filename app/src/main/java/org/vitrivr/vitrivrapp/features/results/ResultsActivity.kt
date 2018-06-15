@@ -8,7 +8,6 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
-import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
@@ -17,7 +16,6 @@ import org.vitrivr.vitrivrapp.R
 import org.vitrivr.vitrivrapp.components.results.EqualSpacingItemDecoration
 import org.vitrivr.vitrivrapp.data.model.enums.MediaType
 import org.vitrivr.vitrivrapp.data.model.enums.ResultViewType
-import org.vitrivr.vitrivrapp.data.model.results.QueryResultPresenterModel
 import org.vitrivr.vitrivrapp.utils.px
 import java.util.*
 
@@ -47,18 +45,14 @@ class ResultsActivity : AppCompatActivity() {
 
             // restore resultsViewModel state if exists
             savedInstanceState?.let {
-                //TODO("restore resultsViewModel state if exists")
-                if (it.getParcelableArrayList<QueryResultPresenterModel>(CURRENT_RESULTS) != null) {
-                    resultsViewModel.getCurrentResults().value = it.getParcelableArrayList(CURRENT_RESULTS)
-                }
+                resultsViewModel.restoreCurrentPresenterResults()
                 resultsViewModel.currResultViewType = it.getSerializable(CURRENT_RESULT_VIEW) as ResultViewType
                 resultsViewModel.categoryCount = it.getSerializable(MEDIA_TYPE_CATEGORIES) as HashMap<MediaType, HashSet<String>>
             }
         }
 
         if (savedInstanceState == null) {
-            val queryString = intent.getStringExtra("query")
-            Log.e("queryString", queryString)
+            val queryString = resultsViewModel.queryToJson()
             if (queryString == null) {
                 Toast.makeText(this, "Error! No Query Found.", Toast.LENGTH_SHORT).show()
                 finish()
@@ -178,9 +172,7 @@ class ResultsActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
 
         outState?.let { bundle ->
-            resultsViewModel.getCurrentResults().value?.let {
-                bundle.putParcelableArrayList(CURRENT_RESULTS, it as ArrayList<QueryResultPresenterModel>)
-            }
+            resultsViewModel.saveCurrentPresenterResults()
             bundle.putParcelable(SAVED_LAYOUT_MANAGER, queryResultsRV.layoutManager.onSaveInstanceState())
             bundle.putSerializable(CURRENT_RESULT_VIEW, resultsViewModel.currResultViewType)
             bundle.putSerializable(MEDIA_TYPE_CATEGORIES, resultsViewModel.categoryCount)
