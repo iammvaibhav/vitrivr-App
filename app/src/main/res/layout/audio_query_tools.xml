@@ -66,6 +66,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="12dp"
                 android:src="@drawable/icon_play_audio"
+                android:tag="play"
                 android:tint="@color/tileIconSelected" />
 
             <TextView

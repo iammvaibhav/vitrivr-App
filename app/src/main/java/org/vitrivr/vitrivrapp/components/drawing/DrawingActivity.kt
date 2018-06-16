@@ -92,9 +92,7 @@ class DrawingActivity : AppCompatActivity(), ColorPickerDialogListener {
             origStream.flush()
             origStream.close()
 
-            val data = Intent()
-            data.putExtra(IMAGE_PATH, file.absolutePath)
-            setResult(Activity.RESULT_OK, data)
+            setResult(Activity.RESULT_OK, null)
             finish()
         }
     }
