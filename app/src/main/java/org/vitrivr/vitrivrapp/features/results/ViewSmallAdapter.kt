@@ -63,6 +63,7 @@ class ViewSmallAdapter(initItemsList: List<QueryResultPresenterModel>, val resul
             val intent = when (items[position].mediaType) {
                 MediaType.IMAGE -> Intent(holder.itemView.context, ImageResultDetailActivity::class.java)
                 MediaType.VIDEO -> Intent(holder.itemView.context, VideoResultDetailActivity::class.java)
+                MediaType.AUDIO -> Intent(holder.itemView.context, VideoResultDetailActivity::class.java)
                 else -> TODO()
             }
 

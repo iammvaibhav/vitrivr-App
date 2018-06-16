@@ -46,6 +46,7 @@ class AllSegmentsAdapter(val allSegments: List<SegmentDetails>,
         val vh = AllSegmentsVH(view)
         when (mediaType) {
             MediaType.VIDEO -> vh.play.visibility = View.VISIBLE
+            MediaType.AUDIO -> vh.play.visibility = View.VISIBLE
         }
         return vh
     }
@@ -84,6 +85,11 @@ class AllSegmentsAdapter(val allSegments: List<SegmentDetails>,
 
         when (mediaType) {
             MediaType.VIDEO -> {
+                holder.play.setOnClickListener {
+                    segmentClickListener?.invoke(allSegments[position].startAbs)
+                }
+            }
+            MediaType.AUDIO -> {
                 holder.play.setOnClickListener {
                     segmentClickListener?.invoke(allSegments[position].startAbs)
                 }
