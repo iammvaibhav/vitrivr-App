@@ -41,6 +41,7 @@ class ImageQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewMod
         imagePreview.setOnClickListener {
             val intent = Intent(context, DrawingActivity::class.java)
             intent.putExtra("containerID", queryViewModel.currContainerID)
+            intent.putExtra("termType", QueryTermType.IMAGE.name)
             (context as Activity).startActivityForResult(intent, DRAWING_RESULT)
         }
 
@@ -66,13 +67,13 @@ class ImageQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewMod
         drawImageBalance.progress = queryViewModel.getBalance(queryViewModel.currContainerID, QueryTermType.IMAGE)
 
         val image = BitmapFactory.decodeFile(File((context as Activity).filesDir,
-                "imageQuery_image_${queryViewModel.currContainerID}.png").absolutePath)
+                "imageQuery_image_${queryViewModel.currContainerID}_IMAGE.png").absolutePath)
         imagePreview.setImageBitmap(image)
     }
 
     fun handleDrawingResult() {
         val image = BitmapFactory.decodeFile(File((context as Activity).filesDir,
-                "imageQuery_image_${queryViewModel.currContainerID}.png").absolutePath)
+                "imageQuery_image_${queryViewModel.currContainerID}_IMAGE.png").absolutePath)
 
         val outputStream = ByteArrayOutputStream()
         image.compress(Bitmap.CompressFormat.PNG, 100, outputStream)

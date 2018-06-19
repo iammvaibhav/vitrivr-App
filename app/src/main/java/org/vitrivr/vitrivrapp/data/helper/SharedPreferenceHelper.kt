@@ -20,6 +20,9 @@ class SharedPreferenceHelper(context: Context, prefName: String) {
 
     fun putString(key: String, value: String) { preferences.edit().putString(key, value).apply() }
     fun getString(key: String): String? = preferences.getString(key, null)
+    fun removeString(key: String) {
+        preferences.edit().remove(key).apply()
+    }
 
     fun putInt(key: String, value: Int) { preferences.edit().putInt(key, value).apply() }
     fun getInt(key: String): Int? = preferences.getInt(key, 0)

@@ -31,6 +31,7 @@ import org.vitrivr.vitrivrapp.features.results.ViewDetailsAdapter.Companion.PRES
 import org.vitrivr.vitrivrapp.utils.px
 import javax.inject.Inject
 
+
 class ImageResultDetailActivity : AppCompatActivity() {
 
     @Inject

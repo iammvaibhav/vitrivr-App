@@ -26,11 +26,6 @@ class DrawingActivity : AppCompatActivity(), ColorPickerDialogListener {
     private val pixelWidth = 300
     private var lastColor = Color.parseColor("#555555")
 
-    companion object {
-        val IMAGE_PATH = "IMAGE_PATH"
-        val ORIGINAL_IMAGE_PATH = "ORIGINAL_IMAGE_PATH"
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.drawing_activity)
@@ -39,7 +34,9 @@ class DrawingActivity : AppCompatActivity(), ColorPickerDialogListener {
         //supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val containerID = intent.getLongExtra("containerID", 0)
-        val origFile = File(filesDir, "imageQuery_image_orig_$containerID.png")
+        val termType = intent.getStringExtra("termType")
+
+        val origFile = File(filesDir, "imageQuery_image_orig_${containerID}_$termType.png")
         if (origFile.exists()) {
             val origImage = BitmapFactory.decodeFile(origFile.absolutePath)
             drawingCanvas.setImageBitmap(origImage)
@@ -72,13 +69,14 @@ class DrawingActivity : AppCompatActivity(), ColorPickerDialogListener {
     fun save(view: View) {
         drawingCanvas.drawable?.let {
             val containerID = intent.getLongExtra("containerID", 0)
+            val termType = intent.getStringExtra("termType")
 
             val scaledBitmap = Bitmap.createScaledBitmap((drawingCanvas.drawable as BitmapDrawable).bitmap, pixelWidth, pixelWidth, false)
             val origBitmap = (drawingCanvas.drawable as BitmapDrawable).bitmap
 
             val dir = filesDir
-            val file = File(dir, "imageQuery_image_$containerID.png")
-            val origFile = File(dir, "imageQuery_image_orig_$containerID.png")
+            val file = File(dir, "imageQuery_image_${containerID}_$termType.png")
+            val origFile = File(dir, "imageQuery_image_orig_${containerID}_$termType.png")
 
             val stream = FileOutputStream(file)
             val origStream = FileOutputStream(origFile)

@@ -19,9 +19,9 @@ import kotlinx.android.synthetic.main.query_activity.*
 import kotlinx.android.synthetic.main.query_detail_bottom_sheet.*
 import org.vitrivr.vitrivrapp.R
 import org.vitrivr.vitrivrapp.data.model.enums.QueryTermType
+import org.vitrivr.vitrivrapp.data.model.query.QueryContainerModel
 import org.vitrivr.vitrivrapp.data.model.query.QueryTermModel
-import org.vitrivr.vitrivrapp.features.query.tools.AudioQueryTools
-import org.vitrivr.vitrivrapp.features.query.tools.ImageQueryTools
+import org.vitrivr.vitrivrapp.features.query.tools.*
 import org.vitrivr.vitrivrapp.features.results.ResultsActivity
 import org.vitrivr.vitrivrapp.features.settings.SettingsActivity
 import org.vitrivr.vitrivrapp.utils.px
@@ -45,6 +45,7 @@ class QueryActivity : AppCompatActivity() {
 
     private var imageQueryTools: ImageQueryTools? = null
     private var audioQueryTools: AudioQueryTools? = null
+    private var model3DQueryTools: Model3DQueryTools? = null
 
     /**
      * This is a listener for switch in the bottom sheet.
@@ -139,7 +140,6 @@ class QueryActivity : AppCompatActivity() {
             queryViewModel.currTermType = queryTerm
             prepareBottomSheet(queryTerm, wasChecked, queryViewModel.currContainerID)
             getQueryContainerWithId(queryViewModel.currContainerID)?.setChecked(queryTerm, true)
-            //bottomSheetToggles.setChecked(queryTerm, false)
         }
     }
 
@@ -168,6 +168,18 @@ class QueryActivity : AppCompatActivity() {
             queryViewModel.currContainerID = containerId
             queryViewModel.currTermType = queryTerm
             prepareBottomSheet(queryTerm, wasChecked, containerId)
+
+            var container: QueryContainerModel? = null
+            for (c in queryViewModel.query.containers) {
+                if (c.id == queryViewModel.currContainerID) container = c
+            }
+
+            container?.let {
+                for (term in container.terms) {
+                    bottomSheetToggles.setChecked(term.type, true)
+                }
+            }
+
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
 
@@ -178,8 +190,8 @@ class QueryActivity : AppCompatActivity() {
         return newContainer
     }
 
-    fun restoreContainerUIState(queryContainer: QueryContainer, queryTerms: List<QueryTermModel>, description: String) {
-        queryContainer.setQueryDescription(description)
+    fun restoreContainerUIState(queryContainer: QueryContainer, queryTerms: List<QueryTermModel>, description: String?) {
+        description?.let { queryContainer.setQueryDescription(description) }
         for (term in queryTerms) {
             queryContainer.setChecked(term.type, true)
         }
@@ -238,6 +250,12 @@ class QueryActivity : AppCompatActivity() {
                     getQueryContainerWithId(queryViewModel.currContainerID)?.performClick(QueryTermType.AUDIO)
                 })
             }
+            QueryTermType.MODEL3D -> {
+                toolTitle.text = "3D Query"
+                model3DQueryTools = Model3DQueryTools(queryViewModel, wasChecked, toolsContainer, this, {
+                    getQueryContainerWithId(queryViewModel.currContainerID)?.performClick(QueryTermType.MODEL3D)
+                })
+            }
         //TODO(Others)
         }
     }
@@ -252,8 +270,8 @@ class QueryActivity : AppCompatActivity() {
     private fun freeResources(type: QueryTermType, containerID: Long) {
         when (type) {
             QueryTermType.IMAGE -> {
-                val preview = File(filesDir, "imageQuery_image_$containerID.png")
-                val orig = File(filesDir, "imageQuery_image_orig_$containerID.png")
+                val preview = File(filesDir, "imageQuery_image_${containerID}_IMAGE.png")
+                val orig = File(filesDir, "imageQuery_image_orig_${containerID}_IMAGE.png")
                 if (preview.exists()) preview.delete()
                 if (orig.exists()) orig.delete()
             }
@@ -262,6 +280,12 @@ class QueryActivity : AppCompatActivity() {
                 val loadedAudioFile = File(filesDir, "audioQuery_loaded_audio_$containerID.wav")
                 if (audioFile.exists()) audioFile.delete()
                 if (loadedAudioFile.exists()) loadedAudioFile.delete()
+            }
+            QueryTermType.MODEL3D -> {
+                val preview = File(filesDir, "imageQuery_image_${containerID}_MODEL3D.png")
+                val orig = File(filesDir, "imageQuery_image_orig_${containerID}_MODEL3D.png")
+                if (preview.exists()) preview.delete()
+                if (orig.exists()) orig.delete()
             }
         }
     }
@@ -310,7 +334,21 @@ class QueryActivity : AppCompatActivity() {
                 } else if (resultCode == Activity.RESULT_CANCELED) {
                     getQueryContainerWithId(queryViewModel.currContainerID)?.performClick(QueryTermType.AUDIO)
                 }
+            }
 
+            MODEL_CHOOSER_RESULT -> {
+                if (resultCode == Activity.RESULT_OK && data != null) {
+                    val filePath = data.getStringExtra(com.nbsp.materialfilepicker.ui.FilePickerActivity.RESULT_FILE_PATH)
+                    model3DQueryTools?.handleChosenModel(filePath)
+                } else if (resultCode == Activity.RESULT_CANCELED) {
+                    getQueryContainerWithId(queryViewModel.currContainerID)?.performClick(QueryTermType.MODEL3D)
+                }
+            }
+
+            MODEL_DRAWING_RESULT -> {
+                if (resultCode == Activity.RESULT_OK)
+                    model3DQueryTools?.handleDrawingResult()
+                getQueryContainerWithId(queryViewModel.currContainerID)?.performClick(QueryTermType.MODEL3D)
             }
         }
     }
@@ -327,6 +365,11 @@ class QueryActivity : AppCompatActivity() {
             LOAD_AUDIO_REQUEST_CODE -> {
                 if (permissions[0] == android.Manifest.permission.WRITE_EXTERNAL_STORAGE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     audioQueryTools?.startPickingFile()
+                }
+            }
+            MODEL_CHOOSER_REQUEST_CODE -> {
+                if (permissions[0] == android.Manifest.permission.READ_EXTERNAL_STORAGE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    model3DQueryTools?.startModelChooserActivity()
                 }
             }
         }

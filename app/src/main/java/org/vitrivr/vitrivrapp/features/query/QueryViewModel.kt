@@ -1,6 +1,7 @@
 package org.vitrivr.vitrivrapp.features.query
 
 import android.arch.lifecycle.ViewModel
+import android.net.Uri
 import com.google.gson.Gson
 import org.vitrivr.vitrivrapp.App
 import org.vitrivr.vitrivrapp.data.model.enums.MessageType
@@ -95,13 +96,17 @@ class QueryViewModel : ViewModel() {
         container?.description = queryDescription
     }
 
-    fun setDataOfQueryTerm(containerId: Long, type: QueryTermType, base64String: String) {
+    fun setDataOfQueryTerm(containerId: Long, type: QueryTermType, base64String: String, dataType: Int = 0) {
         val term = getTermInContainer(type, getContainerWithId(containerId))
         val data = when (type) {
             QueryTermType.IMAGE -> "data:image/png;base64,$base64String"
             QueryTermType.AUDIO -> "data:audio/wav;base64,$base64String"
             QueryTermType.MODEL3D -> "data:application/3d-json;base64,$base64String"
-            QueryTermType.MOTION -> "data:application/json;base64,$base64String"
+            QueryTermType.MOTION -> {
+                if (dataType == 0)
+                    "data:application/json;base64,$base64String"
+                else "data:image/png;base64,$base64String"
+            }
             QueryTermType.TEXT -> base64String
             QueryTermType.LOCATION -> TODO("Location is not implemented yet")
         }
@@ -188,4 +193,10 @@ class QueryViewModel : ViewModel() {
             this.query = it
         }
     }
+
+    fun putModelUri(uri: Uri?, containerId: Long) {
+        queryRepository.putModelUri(uri, containerId)
+    }
+
+    fun getModelUri(containerId: Long) = queryRepository.getModelUri(containerId)
 }
