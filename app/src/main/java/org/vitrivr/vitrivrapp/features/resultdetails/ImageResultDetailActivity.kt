@@ -71,7 +71,6 @@ class ImageResultDetailActivity : AppCompatActivity() {
 
         val uri = pathUtils.getObjectURI(presenterObject)
 
-
         val view = LayoutInflater.from(this).inflate(R.layout.object_info, null)
 
         featureInfoDialog = AlertDialog.Builder(this)

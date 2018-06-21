@@ -18,11 +18,13 @@ import kotlinx.android.synthetic.main.audio_query_tools.*
 import kotlinx.android.synthetic.main.query_activity.*
 import kotlinx.android.synthetic.main.query_detail_bottom_sheet.*
 import org.vitrivr.vitrivrapp.R
+import org.vitrivr.vitrivrapp.data.model.enums.MessageType
 import org.vitrivr.vitrivrapp.data.model.enums.QueryTermType
 import org.vitrivr.vitrivrapp.data.model.query.QueryContainerModel
 import org.vitrivr.vitrivrapp.data.model.query.QueryTermModel
 import org.vitrivr.vitrivrapp.features.query.tools.*
 import org.vitrivr.vitrivrapp.features.results.ResultsActivity
+import org.vitrivr.vitrivrapp.features.results.ResultsActivity.Companion.QUERY_TYPE
 import org.vitrivr.vitrivrapp.features.settings.SettingsActivity
 import org.vitrivr.vitrivrapp.utils.px
 import java.io.File
@@ -212,6 +214,7 @@ class QueryActivity : AppCompatActivity() {
 
     fun search(view: View) {
         val intent = Intent(this, ResultsActivity::class.java)
+        intent.putExtra(QUERY_TYPE, MessageType.Q_SIM)
         queryViewModel.saveQueryObject()
         startActivity(intent)
     }

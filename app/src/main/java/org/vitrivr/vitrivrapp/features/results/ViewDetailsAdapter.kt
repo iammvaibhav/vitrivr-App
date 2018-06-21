@@ -20,6 +20,7 @@ import org.vitrivr.vitrivrapp.data.model.enums.ResultViewType
 import org.vitrivr.vitrivrapp.data.model.query.MoreLikeThisQueryModel
 import org.vitrivr.vitrivrapp.data.model.results.QueryResultPresenterModel
 import org.vitrivr.vitrivrapp.features.resultdetails.ImageResultDetailActivity
+import org.vitrivr.vitrivrapp.features.resultdetails.Model3DResultDetailActivity
 import org.vitrivr.vitrivrapp.features.resultdetails.VideoResultDetailActivity
 import org.vitrivr.vitrivrapp.utils.format
 import javax.inject.Inject
@@ -116,7 +117,7 @@ class ViewDetailsAdapter(initItemsList: List<QueryResultPresenterModel>,
                 MediaType.IMAGE -> Intent(holder.itemView.context, ImageResultDetailActivity::class.java)
                 MediaType.VIDEO -> Intent(holder.itemView.context, VideoResultDetailActivity::class.java)
                 MediaType.AUDIO -> Intent(holder.itemView.context, VideoResultDetailActivity::class.java)
-                else -> TODO()
+                MediaType.MODEL3D -> Intent(holder.itemView.context, Model3DResultDetailActivity::class.java)
             }
 
             intent.putExtra(PRESENTER_OBJECT, items[position])

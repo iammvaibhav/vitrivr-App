@@ -63,6 +63,8 @@ dependencies {
     implementation 'nl.bravobit:android-ffmpeg:1.1.5'
     implementation 'com.github.evgenyneu:js-evaluator-for-android:v4.0.0'
     implementation 'com.nbsp:library:1.8'
+    implementation 'com.google.vr:sdk-base:1.140.0'
+    implementation(name:'model_viewer', ext:'aar')
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'

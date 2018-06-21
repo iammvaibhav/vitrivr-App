@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorWindowBackground"
+    tools:context="com.dmitrybrant.modelviewer.ModelActivity">
+
+    <ProgressBar
+        android:id="@+id/model_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="16dp" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/vr_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        app:backgroundTint="@color/colorPrimaryLight"
+        app:srcCompat="@drawable/ic_google_cardboard"
+        app:useCompatPadding="true" />
+
+    <LinearLayout
+        android:id="@+id/info_save_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_margin="12dp"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:onClick="info"
+            android:src="@drawable/icon_info"
+            android:tint="@android:color/white" />
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginLeft="8dp"
+            android:onClick="save"
+            android:src="@drawable/icon_save"
+            android:tint="@android:color/white" />
+
+    </LinearLayout>
+
+</FrameLayout>

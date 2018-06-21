@@ -22,6 +22,7 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.*
+import com.dmitrybrant.modelviewer.ModelActivity
 import com.nbsp.materialfilepicker.MaterialFilePicker
 import org.vitrivr.vitrivrapp.R
 import org.vitrivr.vitrivrapp.components.drawing.DrawingActivity
@@ -133,9 +134,12 @@ class Model3DQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewM
             sketch2dSwitch.isChecked = false
             resolutionBalance.progress = queryViewModel.getBalance(queryViewModel.currContainerID, QueryTermType.MODEL3D)
             queryViewModel.getModelUri(queryViewModel.currContainerID)?.let {
+                val uri = it
                 status.text = "Model Loaded. Tap to view"
                 status.setOnClickListener {
-
+                    val modelIntent = Intent(context, ModelActivity::class.java)
+                    modelIntent.data = uri
+                    (context as Activity).startActivity(modelIntent)
                 }
             }
         }
@@ -149,7 +153,7 @@ class Model3DQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewM
     }
 
     fun handleChosenModel(filePath: String) {
-        val uri = Uri.parse(filePath)
+        val uri = Uri.fromFile(File(filePath))
         val html = getHTMLforModel(uri)
 
         if (html == null) {
@@ -157,7 +161,6 @@ class Model3DQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewM
             return
         }
 
-        Log.e("thread", Thread.currentThread().name)
         val webview = WebView(context)
         webview.settings.allowFileAccess = true
         webview.settings.javaScriptEnabled = true

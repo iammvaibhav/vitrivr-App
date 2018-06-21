@@ -23,6 +23,9 @@ allprojects {
         maven { url 'http://guardian.github.com/maven/repo-releases' }
         maven { url  "http://dl.bintray.com/piasy/maven" }
         maven { url  "http://dl.bintray.com/lukaville/maven" }
+        flatDir {
+            dirs 'libs'
+        }
     }
 }
 

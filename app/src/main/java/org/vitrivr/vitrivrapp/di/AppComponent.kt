@@ -6,6 +6,7 @@ import org.vitrivr.vitrivrapp.data.repository.QueryResultsRepository
 import org.vitrivr.vitrivrapp.features.query.QueryViewModel
 import org.vitrivr.vitrivrapp.features.resultdetails.AllSegmentsAdapter
 import org.vitrivr.vitrivrapp.features.resultdetails.ImageResultDetailActivity
+import org.vitrivr.vitrivrapp.features.resultdetails.Model3DResultDetailActivity
 import org.vitrivr.vitrivrapp.features.resultdetails.VideoResultDetailActivity
 import org.vitrivr.vitrivrapp.features.results.PathUtils
 import org.vitrivr.vitrivrapp.features.results.ResultsViewModel
@@ -29,5 +30,6 @@ interface AppComponent {
     fun inject(imageResultDetailActivity: ImageResultDetailActivity)
     fun inject(allSegmentsAdapter: AllSegmentsAdapter)
     fun inject(videoResultDetailActivity: VideoResultDetailActivity)
+    fun inject(model3DResultDetailActivity: Model3DResultDetailActivity)
 
 }

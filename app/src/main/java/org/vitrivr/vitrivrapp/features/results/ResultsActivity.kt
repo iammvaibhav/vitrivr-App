@@ -15,6 +15,7 @@ import kotlinx.android.synthetic.main.results_activity.*
 import org.vitrivr.vitrivrapp.R
 import org.vitrivr.vitrivrapp.components.results.EqualSpacingItemDecoration
 import org.vitrivr.vitrivrapp.data.model.enums.MediaType
+import org.vitrivr.vitrivrapp.data.model.enums.MessageType
 import org.vitrivr.vitrivrapp.data.model.enums.ResultViewType
 import org.vitrivr.vitrivrapp.utils.px
 import java.util.*
@@ -27,6 +28,10 @@ class ResultsActivity : AppCompatActivity() {
     val CURRENT_RESULT_VIEW = "CURRENT_RESULT_VIEW"
     val SAVED_LAYOUT_MANAGER = "SAVED_LAYOUT_MANAGER"
     val MEDIA_TYPE_CATEGORIES = "MEDIA_TYPE_CATEGORIES"
+
+    companion object {
+        val QUERY_TYPE = "QUERY_TYPE"
+    }
 
     val largeViewAdapter by lazy { ViewDetailsAdapter(listOf(), ResultViewType.LARGE, resultsViewModel, ::startQuery) }
     val mediumViewAdapter by lazy { ViewDetailsAdapter(listOf(), ResultViewType.MEDIUM, resultsViewModel, ::startQuery) }
@@ -52,10 +57,11 @@ class ResultsActivity : AppCompatActivity() {
         }
 
         if (savedInstanceState == null) {
-            val queryString = resultsViewModel.queryToJson()
-            if (queryString == null) {
-                Toast.makeText(this, "Error! No Query Found.", Toast.LENGTH_SHORT).show()
-                finish()
+            val queryType = intent.getSerializableExtra(QUERY_TYPE) as MessageType
+            val queryString = when (queryType) {
+                MessageType.Q_SIM -> resultsViewModel.queryToJson()
+                MessageType.Q_MLT -> intent.getStringExtra("query")
+                else -> ""
             }
             viewLarge(view_large)
             startQuery(queryString)
