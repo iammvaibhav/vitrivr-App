@@ -48,6 +48,7 @@ class QueryActivity : AppCompatActivity() {
     private var imageQueryTools: ImageQueryTools? = null
     private var audioQueryTools: AudioQueryTools? = null
     private var model3DQueryTools: Model3DQueryTools? = null
+    private var motionQueryTools: MotionQueryTools? = null
 
     /**
      * This is a listener for switch in the bottom sheet.
@@ -259,6 +260,10 @@ class QueryActivity : AppCompatActivity() {
                     getQueryContainerWithId(queryViewModel.currContainerID)?.performClick(QueryTermType.MODEL3D)
                 })
             }
+            QueryTermType.MOTION -> {
+                toolTitle.text = "Motion Query"
+                motionQueryTools = MotionQueryTools(queryViewModel, wasChecked, toolsContainer, this)
+            }
         //TODO(Others)
         }
     }
@@ -289,6 +294,11 @@ class QueryActivity : AppCompatActivity() {
                 val orig = File(filesDir, "imageQuery_image_orig_${containerID}_MODEL3D.png")
                 if (preview.exists()) preview.delete()
                 if (orig.exists()) orig.delete()
+            }
+            QueryTermType.MOTION -> {
+                val preview = File(filesDir, "MOTION_QUERY_KEY_$containerID.png")
+                if (preview.exists()) preview.delete()
+                queryViewModel.removeMotionData(containerID)
             }
         }
     }
@@ -352,6 +362,14 @@ class QueryActivity : AppCompatActivity() {
                 if (resultCode == Activity.RESULT_OK)
                     model3DQueryTools?.handleDrawingResult()
                 getQueryContainerWithId(queryViewModel.currContainerID)?.performClick(QueryTermType.MODEL3D)
+            }
+
+            MOTION_DRAW_RESULT -> {
+                if (resultCode == Activity.RESULT_OK && data != null) {
+                    val base64 = data.getStringExtra("base64")
+                    motionQueryTools?.handleMotionDrawingResult(base64)
+                }
+                getQueryContainerWithId(queryViewModel.currContainerID)?.performClick(QueryTermType.MOTION)
             }
         }
     }

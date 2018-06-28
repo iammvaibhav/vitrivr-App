@@ -101,12 +101,12 @@ class QueryViewModel : ViewModel() {
         val data = when (type) {
             QueryTermType.IMAGE -> "data:image/png;base64,$base64String"
             QueryTermType.AUDIO -> "data:audio/wav;base64,$base64String"
-            QueryTermType.MODEL3D -> "data:application/3d-json;base64,$base64String"
-            QueryTermType.MOTION -> {
+            QueryTermType.MODEL3D -> {
                 if (dataType == 0)
-                    "data:application/json;base64,$base64String"
+                    "data:application/3d-json;base64,$base64String"
                 else "data:image/png;base64,$base64String"
             }
+            QueryTermType.MOTION -> "data:application/json;base64,$base64String"
             QueryTermType.TEXT -> base64String
             QueryTermType.LOCATION -> TODO("Location is not implemented yet")
         }
@@ -199,4 +199,8 @@ class QueryViewModel : ViewModel() {
     }
 
     fun getModelUri(containerId: Long) = queryRepository.getModelUri(containerId)
+
+    fun removeMotionData(containerId: Long) {
+        queryRepository.removeMotionData(containerId)
+    }
 }

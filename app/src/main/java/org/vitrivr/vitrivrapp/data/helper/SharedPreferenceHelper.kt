@@ -20,9 +20,12 @@ class SharedPreferenceHelper(context: Context, prefName: String) {
 
     fun putString(key: String, value: String) { preferences.edit().putString(key, value).apply() }
     fun getString(key: String): String? = preferences.getString(key, null)
-    fun removeString(key: String) {
+
+    fun removeKey(key: String) {
         preferences.edit().remove(key).apply()
     }
+
+    fun hasHey(key: String) = preferences.contains(key)
 
     fun putInt(key: String, value: Int) { preferences.edit().putInt(key, value).apply() }
     fun getInt(key: String): Int? = preferences.getInt(key, 0)
@@ -42,8 +45,6 @@ class SharedPreferenceHelper(context: Context, prefName: String) {
 
     fun <T> getObjectList(key: String): List<T>? {
         val json = getString(key)
-        return gson.fromJson(json, object : TypeToken<List<T>>() {}.type)
+        return gson.fromJson<List<T>>(json, object : TypeToken<List<T>>() {}.type)
     }
-
-
 }
