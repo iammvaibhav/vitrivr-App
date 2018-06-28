@@ -164,7 +164,7 @@ class MotionDrawingActivity : AppCompatActivity() {
                 distanceCovered += speed
             }
         }
-        
+
         return Base64.encodeToString(Gson().toJson(model).toByteArray(), Base64.NO_WRAP)
     }
 

@@ -49,6 +49,7 @@ class QueryActivity : AppCompatActivity() {
     private var audioQueryTools: AudioQueryTools? = null
     private var model3DQueryTools: Model3DQueryTools? = null
     private var motionQueryTools: MotionQueryTools? = null
+    private var textQueryTools: TextQueryTools? = null
 
     /**
      * This is a listener for switch in the bottom sheet.
@@ -263,6 +264,10 @@ class QueryActivity : AppCompatActivity() {
             QueryTermType.MOTION -> {
                 toolTitle.text = "Motion Query"
                 motionQueryTools = MotionQueryTools(queryViewModel, wasChecked, toolsContainer, this)
+            }
+            QueryTermType.TEXT -> {
+                toolTitle.text = "Text Query"
+                textQueryTools = TextQueryTools(queryViewModel, wasChecked, toolsContainer, this)
             }
         //TODO(Others)
         }

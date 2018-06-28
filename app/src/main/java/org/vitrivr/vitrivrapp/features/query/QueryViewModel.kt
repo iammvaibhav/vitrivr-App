@@ -184,6 +184,23 @@ class QueryViewModel : ViewModel() {
         return 0
     }
 
+    fun getTextQueryCategories(containerId: Long) = getTermInContainer(QueryTermType.TEXT, getContainerWithId(containerId))?.categories
+
+    fun addTextQueryCategory(containerId: Long, category: String) {
+        val categories = getTermInContainer(QueryTermType.TEXT, getContainerWithId(containerId))?.categories
+        val categorySet = HashSet(categories)
+        categorySet.add(category)
+        categories?.clear()
+        categories?.addAll(categorySet)
+    }
+
+    fun removeTextQueryCategory(containerId: Long, category: String) {
+        val categories = getTermInContainer(QueryTermType.TEXT, getContainerWithId(containerId))?.categories
+        categories?.remove(category)
+    }
+
+    fun getTextQueryData(containerId: Long) = getTermInContainer(QueryTermType.TEXT, getContainerWithId(containerId))?.data
+
     fun saveQueryObject() {
         queryRepository.putQueryObject(query)
     }
