@@ -207,6 +207,7 @@ class QueryActivity : AppCompatActivity() {
 
     fun clearAll(view: View) {
         queryContainers.removeAllViews()
+        queryViewModel.query.containers.clear()
         addQueryContainer(null)
     }
 

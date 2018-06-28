@@ -34,7 +34,6 @@ class QueryResultsService @Inject constructor(val okHttpClient: OkHttpClient, va
 
         override fun onOpen(webSocket: WebSocket?, response: Response?) {
             webSocket?.send(query)
-            webSocket?.close(CLOSE_CODE_NORMAL, "Query Completed")
         }
 
         override fun onFailure(webSocket: WebSocket?, t: Throwable?, response: Response?) {
@@ -50,6 +49,9 @@ class QueryResultsService @Inject constructor(val okHttpClient: OkHttpClient, va
                     override val messageType: MessageType
                         get() = baseQueryHelper.messageType
                 }
+
+                if (baseQuery.messageType == MessageType.QR_END)
+                    webSocket?.close(CLOSE_CODE_NORMAL, "Query Completed")
 
                 queryResults.onNext(when (baseQuery.messageType) {
                     MessageType.QR_START -> gson.fromJson(it, QueryResultStartModel::class.java)

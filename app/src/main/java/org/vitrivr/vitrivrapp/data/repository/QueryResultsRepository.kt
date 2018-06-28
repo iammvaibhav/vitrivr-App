@@ -29,7 +29,7 @@ class QueryResultsRepository @Inject constructor(context: Context) {
     fun getQueryResults(query: String): Observable<QueryResultBaseModel> {
         val serverSettings = settingsService.getServerSettings()
         return queryResultsService.getQueryResults(query,
-                "ws://${serverSettings?.address}:${serverSettings?.port}/api/v1")
+                "ws://${serverSettings?.address}:${serverSettings?.port}/api/v1/websocket")
     }
 
     fun putCurrentPresenterResults(results: List<QueryResultPresenterModel>) {
