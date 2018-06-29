@@ -27,14 +27,12 @@ import com.nbsp.materialfilepicker.MaterialFilePicker
 import org.vitrivr.vitrivrapp.R
 import org.vitrivr.vitrivrapp.components.drawing.DrawingActivity
 import org.vitrivr.vitrivrapp.data.model.enums.QueryTermType
+import org.vitrivr.vitrivrapp.features.query.MODEL_CHOOSER_REQUEST_CODE
+import org.vitrivr.vitrivrapp.features.query.MODEL_CHOOSER_RESULT
+import org.vitrivr.vitrivrapp.features.query.MODEL_DRAWING_RESULT
 import org.vitrivr.vitrivrapp.features.query.QueryViewModel
 import java.io.ByteArrayOutputStream
 import java.io.File
-
-
-val MODEL_CHOOSER_REQUEST_CODE = 101
-val MODEL_CHOOSER_RESULT = 100
-val MODEL_DRAWING_RESULT = 101
 
 class Model3DQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewModel,
                                                   wasChecked: Boolean,
@@ -257,11 +255,11 @@ class Model3DQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewM
         val base64String = Base64.encodeToString(outputStream.toByteArray(), Base64.NO_WRAP)
         queryViewModel.setDataOfQueryTerm(queryViewModel.currContainerID, QueryTermType.MODEL3D, base64String, 1)
     }
-}
 
-class WebViewJavaScriptInterface(val processBase64JSONData: (String) -> Unit) {
-    @JavascriptInterface
-    fun processModelBase64JSONData(base64json: String) {
-        processBase64JSONData(base64json)
+    class WebViewJavaScriptInterface(val processBase64JSONData: (String) -> Unit) {
+        @JavascriptInterface
+        fun processModelBase64JSONData(base64json: String) {
+            processBase64JSONData(base64json)
+        }
     }
 }

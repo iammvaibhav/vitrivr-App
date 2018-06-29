@@ -6,6 +6,7 @@ import com.google.gson.Gson
 import org.vitrivr.vitrivrapp.App
 import org.vitrivr.vitrivrapp.data.model.enums.MessageType
 import org.vitrivr.vitrivrapp.data.model.enums.QueryTermType
+import org.vitrivr.vitrivrapp.data.model.query.LocationQueryDataModel
 import org.vitrivr.vitrivrapp.data.model.query.QueryContainerModel
 import org.vitrivr.vitrivrapp.data.model.query.QueryModel
 import org.vitrivr.vitrivrapp.data.model.query.QueryTermModel
@@ -72,7 +73,7 @@ class QueryViewModel : ViewModel() {
             QueryTermType.MODEL3D -> arrayListOf("sphericalharmonicslow")
             QueryTermType.MOTION -> arrayListOf("motion")
             QueryTermType.TEXT -> arrayListOf()
-            QueryTermType.LOCATION -> TODO("Location is not implemented yet")
+            QueryTermType.LOCATION -> arrayListOf("location")
         }
         getContainerWithId(containerId)?.terms?.add(QueryTermModel("", categories, type))
     }
@@ -108,7 +109,7 @@ class QueryViewModel : ViewModel() {
             }
             QueryTermType.MOTION -> "data:application/json;base64,$base64String"
             QueryTermType.TEXT -> base64String
-            QueryTermType.LOCATION -> TODO("Location is not implemented yet")
+            QueryTermType.LOCATION -> base64String
         }
         term?.data = data
     }
@@ -200,6 +201,13 @@ class QueryViewModel : ViewModel() {
     }
 
     fun getTextQueryData(containerId: Long) = getTermInContainer(QueryTermType.TEXT, getContainerWithId(containerId))?.data
+
+    fun getLocationQueryData(containerId: Long): LocationQueryDataModel {
+        val data = getTermInContainer(QueryTermType.LOCATION, getContainerWithId(containerId))?.data
+        if (data == null || data == "")
+            return LocationQueryDataModel(0.0, 0.0)
+        return gson.fromJson<LocationQueryDataModel>(data, LocationQueryDataModel::class.java)
+    }
 
     fun saveQueryObject() {
         queryRepository.putQueryObject(query)

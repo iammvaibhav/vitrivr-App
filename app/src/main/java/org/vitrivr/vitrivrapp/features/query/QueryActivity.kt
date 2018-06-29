@@ -13,6 +13,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.CompoundButton
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import droidninja.filepicker.FilePickerConst
 import kotlinx.android.synthetic.main.audio_query_tools.*
 import kotlinx.android.synthetic.main.query_activity.*
@@ -32,9 +34,14 @@ import java.io.File
 const val DRAWING_RESULT = 1
 const val RECORD_AUDIO_RESULT = 2
 const val LOAD_AUDIO_RESULT = 3
+const val MODEL_CHOOSER_RESULT = 4
+const val MODEL_DRAWING_RESULT = 5
+const val MOTION_DRAW_RESULT = 6
 
 const val RECORD_REQUEST_CODE = 1
 const val LOAD_AUDIO_REQUEST_CODE = 2
+const val MODEL_CHOOSER_REQUEST_CODE = 3
+const val CURRENT_LOCATION_REQUEST_CODE = 4
 
 class QueryActivity : AppCompatActivity() {
 
@@ -44,12 +51,14 @@ class QueryActivity : AppCompatActivity() {
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<NestedScrollView>
     private lateinit var queryViewModel: QueryViewModel
     private lateinit var bottomSheetToggles: QueryToggles
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private var imageQueryTools: ImageQueryTools? = null
     private var audioQueryTools: AudioQueryTools? = null
     private var model3DQueryTools: Model3DQueryTools? = null
     private var motionQueryTools: MotionQueryTools? = null
     private var textQueryTools: TextQueryTools? = null
+    private var locationQueryTools: LocationQueryTools? = null
 
     /**
      * This is a listener for switch in the bottom sheet.
@@ -92,6 +101,8 @@ class QueryActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
         this.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         // obtain the QueryViewModel object for this activity from ViewModel Provider
         queryViewModel = ViewModelProviders.of(this).get(QueryViewModel::class.java)
@@ -270,7 +281,10 @@ class QueryActivity : AppCompatActivity() {
                 toolTitle.text = "Text Query"
                 textQueryTools = TextQueryTools(queryViewModel, wasChecked, toolsContainer, this)
             }
-        //TODO(Others)
+            QueryTermType.LOCATION -> {
+                toolTitle.text = "Location Query"
+                locationQueryTools = LocationQueryTools(queryViewModel, wasChecked, toolsContainer, this, fusedLocationClient)
+            }
         }
     }
 
@@ -397,6 +411,11 @@ class QueryActivity : AppCompatActivity() {
             MODEL_CHOOSER_REQUEST_CODE -> {
                 if (permissions[0] == android.Manifest.permission.READ_EXTERNAL_STORAGE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     model3DQueryTools?.startModelChooserActivity()
+                }
+            }
+            CURRENT_LOCATION_REQUEST_CODE -> {
+                if (permissions[0] == android.Manifest.permission.ACCESS_FINE_LOCATION && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    locationQueryTools?.setCurrentLocation()
                 }
             }
         }

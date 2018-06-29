@@ -12,10 +12,9 @@ import android.widget.ImageView
 import org.vitrivr.vitrivrapp.R
 import org.vitrivr.vitrivrapp.components.drawing.MotionDrawingActivity
 import org.vitrivr.vitrivrapp.data.model.enums.QueryTermType
+import org.vitrivr.vitrivrapp.features.query.MOTION_DRAW_RESULT
 import org.vitrivr.vitrivrapp.features.query.QueryViewModel
 import java.io.File
-
-val MOTION_DRAW_RESULT = 200
 
 class MotionQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewModel,
                                                  wasChecked: Boolean,
