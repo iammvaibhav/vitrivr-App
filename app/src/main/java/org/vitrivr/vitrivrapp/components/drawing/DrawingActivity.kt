@@ -25,6 +25,8 @@ class DrawingActivity : AppCompatActivity(), ColorPickerDialogListener {
     private val SELECT_PHOTO = 1
     private val pixelWidth = 300
     private var lastColor = Color.parseColor("#555555")
+    lateinit var drawingCanvas: DrawableImageView
+    lateinit var brushWidth: SeekBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,11 +35,18 @@ class DrawingActivity : AppCompatActivity(), ColorPickerDialogListener {
         supportActionBar?.setDisplayShowTitleEnabled(false)
         //supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        drawingCanvas = findViewById(R.id.drawingCanvas)
+        brushWidth = findViewById(R.id.brushWidth)
+
         val containerID = intent.getLongExtra("containerID", 0)
         val termType = intent.getStringExtra("termType")
 
+        val tempFile = File(filesDir, "imageQuery_tempImage.png")
         val origFile = File(filesDir, "imageQuery_image_orig_${containerID}_$termType.png")
-        if (origFile.exists()) {
+        if (tempFile.exists()) {
+            val tempImage = BitmapFactory.decodeFile(tempFile.absolutePath)
+            drawingCanvas.setImageBitmap(tempImage)
+        } else if (origFile.exists()) {
             val origImage = BitmapFactory.decodeFile(origFile.absolutePath)
             drawingCanvas.setImageBitmap(origImage)
         } else {
@@ -161,6 +170,26 @@ class DrawingActivity : AppCompatActivity(), ColorPickerDialogListener {
                     drawingCanvas.setImageBitmap(it)
                 }
             }
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+
+        val tempBitmap = (drawingCanvas.drawable as BitmapDrawable).bitmap
+        val tempStream = FileOutputStream(File(filesDir, "imageQuery_tempImage.png"))
+        tempBitmap.compress(Bitmap.CompressFormat.PNG, 100, tempStream)
+        tempStream.flush()
+        tempStream.close()
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        if (isFinishing) {
+            val tempFile = File(filesDir, "imageQuery_tempImage.png")
+            if (tempFile.exists())
+                tempFile.delete()
         }
     }
 

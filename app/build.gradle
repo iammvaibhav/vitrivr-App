@@ -65,6 +65,7 @@ dependencies {
     implementation 'com.nbsp:library:1.8'
     implementation 'com.google.vr:sdk-base:1.140.0'
     implementation 'com.google.android.gms:play-services-location:15.0.1'
+    implementation 'com.h6ah4i.android.widget.verticalseekbar:verticalseekbar:0.7.2'
     implementation(name:'model_viewer', ext:'aar')
 
     testImplementation 'junit:junit:4.12'

@@ -10,10 +10,10 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import org.vitrivr.vitrivrapp.R
 
-class DrawableImageView @JvmOverloads constructor(context: Context,
-                                                  attrs: AttributeSet? = null,
-                                                  defStyleAttr: Int = 0,
-                                                  defStyleRes: Int = 0) :
+open class DrawableImageView @JvmOverloads constructor(context: Context,
+                                                       attrs: AttributeSet? = null,
+                                                       defStyleAttr: Int = 0,
+                                                       defStyleRes: Int = 0) :
         AppCompatImageView(context, attrs, defStyleAttr) {
 
     private val defaultStrokeColor = Color.WHITE

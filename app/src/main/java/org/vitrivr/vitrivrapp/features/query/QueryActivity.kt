@@ -176,6 +176,11 @@ class QueryActivity : AppCompatActivity() {
             if (queryContainers.childCount > 1) {
                 queryContainers.removeView(newContainer)
                 queryViewModel.removeContainer(containerId)
+
+                freeResources(QueryTermType.IMAGE, containerId)
+                freeResources(QueryTermType.AUDIO, containerId)
+                freeResources(QueryTermType.MODEL3D, containerId)
+                freeResources(QueryTermType.MOTION, containerId)
             }
         }
 
@@ -217,6 +222,13 @@ class QueryActivity : AppCompatActivity() {
     }
 
     fun clearAll(view: View) {
+        for (container in queryViewModel.query.containers) {
+            val containerId = container.id
+            freeResources(QueryTermType.IMAGE, containerId)
+            freeResources(QueryTermType.AUDIO, containerId)
+            freeResources(QueryTermType.MODEL3D, containerId)
+            freeResources(QueryTermType.MOTION, containerId)
+        }
         queryContainers.removeAllViews()
         queryViewModel.query.containers.clear()
         addQueryContainer(null)
