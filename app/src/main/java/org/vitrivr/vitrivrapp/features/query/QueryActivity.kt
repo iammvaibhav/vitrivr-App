@@ -232,6 +232,8 @@ class QueryActivity : AppCompatActivity() {
         queryContainers.removeAllViews()
         queryViewModel.query.containers.clear()
         addQueryContainer(null)
+        for (term in QueryTermType.values())
+            bottomSheetToggles.setChecked(term, false)
     }
 
     fun collapseBottomSheet(view: View) {
