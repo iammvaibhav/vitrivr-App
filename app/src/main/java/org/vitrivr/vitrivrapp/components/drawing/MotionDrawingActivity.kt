@@ -31,7 +31,10 @@ class MotionDrawingActivity : AppCompatActivity() {
     val MOTION_DRAWING_DATA = "MOTION_DRAWING_DATA"
     lateinit var PATH_LIST: String
     lateinit var ARROW_LIST: String
+    lateinit var PATH_LIST_SAVE: String
+    lateinit var ARROW_LIST_SAVE: String
     lateinit var MOTION_QUERY_KEY: String
+    lateinit var motionDrawingCanvas: MotionDrawableImageView
 
     init {
         App.daggerAppComponent.inject(this)
@@ -44,9 +47,13 @@ class MotionDrawingActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
+        motionDrawingCanvas = findViewById(R.id.motionDrawingCanvas)
+
         val containerID = intent.getLongExtra("containerID", 0)
         PATH_LIST = "PATH_LIST_$containerID"
         ARROW_LIST = "ARROW_LIST_$containerID"
+        PATH_LIST_SAVE = "PATH_LIST_SAVE_$containerID"
+        ARROW_LIST_SAVE = "ARROW_LIST_SAVE_$containerID"
         MOTION_QUERY_KEY = "MOTION_QUERY_KEY_$containerID.png"
 
         motionDrawingCanvas.post {
@@ -58,9 +65,21 @@ class MotionDrawingActivity : AppCompatActivity() {
 
         background(null)
 
-        if (spHelper.hasHey(PATH_LIST) && spHelper.hasHey(ARROW_LIST)) {
+        val pathList = when {
+            spHelper.hasHey(PATH_LIST) -> spHelper.getString(PATH_LIST)
+            spHelper.hasHey(PATH_LIST_SAVE) -> spHelper.getString(PATH_LIST_SAVE)
+            else -> null
+        }
 
-            val pathList = Gson().fromJson<ArrayList<Pair<ArrayList<SerializablePath.Action>, Int>>>(spHelper.getString(PATH_LIST),
+        val arrowList = when {
+            spHelper.hasHey(ARROW_LIST) -> spHelper.getString(ARROW_LIST)
+            spHelper.hasHey(ARROW_LIST_SAVE) -> spHelper.getString(ARROW_LIST_SAVE)
+            else -> null
+        }
+
+        if (pathList != null && arrowList != null) {
+
+            val pathList = Gson().fromJson<ArrayList<Pair<ArrayList<SerializablePath.Action>, Int>>>(pathList,
                     object : TypeToken<ArrayList<Pair<ArrayList<SerializablePath.Action>, Int>>>() {}.type)
                     ?.map {
                         Pair(SerializablePath().apply {
@@ -69,7 +88,7 @@ class MotionDrawingActivity : AppCompatActivity() {
                         }, Paint(motionDrawingCanvas.pathPaint).apply { color = it.second })
                     }
 
-            val arrowList = Gson().fromJson<ArrayList<Pair<Arrow, Int>>>(spHelper.getString(ARROW_LIST),
+            val arrowList = Gson().fromJson<ArrayList<Pair<Arrow, Int>>>(arrowList,
                     object : TypeToken<ArrayList<Pair<Arrow, Int>>>() {}.type)
                     ?.map { Pair(it.first.apply { prepareMatrixFromValues() }, Paint(motionDrawingCanvas.arrowPaint).apply { color = it.second }) }
 
@@ -90,8 +109,8 @@ class MotionDrawingActivity : AppCompatActivity() {
         val serializablePath = motionDrawingCanvas.paths.map { Pair(it.first.actions, it.second.color) }
         val serializableArrow = motionDrawingCanvas.arrows.map { Pair(it.first, it.second.color) }
 
-        spHelper.putListObject(PATH_LIST, serializablePath)
-        spHelper.putListObject(ARROW_LIST, serializableArrow)
+        spHelper.putListObject(PATH_LIST_SAVE, serializablePath)
+        spHelper.putListObject(ARROW_LIST_SAVE, serializableArrow)
 
         val dir = filesDir
         val file = File(dir, MOTION_QUERY_KEY)
@@ -114,6 +133,8 @@ class MotionDrawingActivity : AppCompatActivity() {
         if (file.exists()) file.delete()
         spHelper.removeKey(PATH_LIST)
         spHelper.removeKey(ARROW_LIST)
+        spHelper.removeKey(PATH_LIST_SAVE)
+        spHelper.removeKey(ARROW_LIST_SAVE)
     }
 
     fun background(view: View?) {
@@ -166,6 +187,15 @@ class MotionDrawingActivity : AppCompatActivity() {
         }
 
         return Base64.encodeToString(Gson().toJson(model).toByteArray(), Base64.NO_WRAP)
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        if (isFinishing) {
+            spHelper.removeKey(PATH_LIST)
+            spHelper.removeKey(ARROW_LIST)
+        }
     }
 
     private fun getTypeFromPaint(paint: Paint): MotionDrawableImageView.Companion.MotionDescription {

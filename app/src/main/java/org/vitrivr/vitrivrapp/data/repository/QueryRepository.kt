@@ -35,10 +35,10 @@ class QueryRepository @Inject constructor(context: Context) {
     }
 
     fun removeMotionData(containerID: Long) {
-        val PATH_LIST = "PATH_LIST_$containerID"
-        val ARROW_LIST = "ARROW_LIST_$containerID"
-        motionSpHelper.removeKey(PATH_LIST)
-        motionSpHelper.removeKey(ARROW_LIST)
+        val PATH_LIST_SAVE = "PATH_LIST_SAVE_$containerID"
+        val ARROW_LIST_SAVE = "ARROW_LIST_SAVE_$containerID"
+        motionSpHelper.removeKey(PATH_LIST_SAVE)
+        motionSpHelper.removeKey(ARROW_LIST_SAVE)
     }
 
 }

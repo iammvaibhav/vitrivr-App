@@ -10,10 +10,10 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import org.vitrivr.vitrivrapp.R
 
-class MotionDrawableImageView @JvmOverloads constructor(context: Context,
-                                                        attrs: AttributeSet? = null,
-                                                        defStyleAttr: Int = 0,
-                                                        defStyleRes: Int = 0) :
+open class MotionDrawableImageView @JvmOverloads constructor(context: Context,
+                                                             attrs: AttributeSet? = null,
+                                                             defStyleAttr: Int = 0,
+                                                             defStyleRes: Int = 0) :
         AppCompatImageView(context, attrs, defStyleAttr) {
 
     companion object {
@@ -198,10 +198,7 @@ class MotionDrawableImageView @JvmOverloads constructor(context: Context,
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-
-        val width = measuredWidth
-        setMeasuredDimension(width, width)
+        setMeasuredDimension(widthMeasureSpec, widthMeasureSpec)
     }
 
     /**

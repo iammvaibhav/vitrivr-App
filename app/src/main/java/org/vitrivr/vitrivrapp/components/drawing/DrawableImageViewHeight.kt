@@ -10,9 +10,6 @@ class DrawableImageViewHeight @JvmOverloads constructor(context: Context,
         DrawableImageView(context, attrs, defStyleAttr, defStyleRes) {
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-
-        val height = measuredHeight
-        setMeasuredDimension(height, height)
+        setMeasuredDimension(heightMeasureSpec, heightMeasureSpec)
     }
 }
