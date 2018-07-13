@@ -83,8 +83,8 @@ class LocationQueryTools @JvmOverloads constructor(val queryViewModel: QueryView
 
     fun setCurrentLocation() {
         fusedLocationProviderClient.lastLocation.addOnSuccessListener {
-            latitude.setText("${it.latitude}")
-            longitude.setText("${it.longitude}")
+            latitude.setText("${it?.latitude}")
+            longitude.setText("${it?.longitude}")
         }
     }
 
