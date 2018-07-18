@@ -1,9 +1,11 @@
 package org.vitrivr.vitrivrapp.di
 
 import dagger.Component
+import org.vitrivr.vitrivrapp.App
 import org.vitrivr.vitrivrapp.components.drawing.MotionDrawingActivity
 import org.vitrivr.vitrivrapp.data.helper.SharedPreferenceHelper
 import org.vitrivr.vitrivrapp.data.repository.QueryResultsRepository
+import org.vitrivr.vitrivrapp.features.addmedia.AddMediaActivity
 import org.vitrivr.vitrivrapp.features.query.QueryViewModel
 import org.vitrivr.vitrivrapp.features.resultdetails.AllSegmentsAdapter
 import org.vitrivr.vitrivrapp.features.resultdetails.ImageResultDetailActivity
@@ -20,6 +22,7 @@ import javax.inject.Singleton
 @Component(modules = [AppModule::class])
 interface AppComponent {
 
+    fun inject(app: App)
     fun inject(sharedPreferenceHelper: SharedPreferenceHelper)
     fun inject(viewModel: QueryViewModel)
     fun inject(viewModel: SettingsViewModel)
@@ -33,5 +36,6 @@ interface AppComponent {
     fun inject(videoResultDetailActivity: VideoResultDetailActivity)
     fun inject(model3DResultDetailActivity: Model3DResultDetailActivity)
     fun inject(motionDrawingActivity: MotionDrawingActivity)
+    fun inject(addMediaActivity: AddMediaActivity)
 
 }

@@ -24,6 +24,7 @@ import org.vitrivr.vitrivrapp.data.model.enums.MessageType
 import org.vitrivr.vitrivrapp.data.model.enums.QueryTermType
 import org.vitrivr.vitrivrapp.data.model.query.QueryContainerModel
 import org.vitrivr.vitrivrapp.data.model.query.QueryTermModel
+import org.vitrivr.vitrivrapp.features.addmedia.AddMediaActivity
 import org.vitrivr.vitrivrapp.features.query.tools.*
 import org.vitrivr.vitrivrapp.features.results.ResultsActivity
 import org.vitrivr.vitrivrapp.features.results.ResultsActivity.Companion.QUERY_TYPE
@@ -219,6 +220,10 @@ class QueryActivity : AppCompatActivity() {
 
     fun openSettings(view: View) {
         startActivity(Intent(this, SettingsActivity::class.java))
+    }
+
+    fun openAddMediaActivity(view: View) {
+        startActivity(Intent(this, AddMediaActivity::class.java))
     }
 
     fun clearAll(view: View) {

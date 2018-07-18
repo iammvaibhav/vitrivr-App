@@ -41,6 +41,9 @@
         <activity
             android:name=".features.settings.SettingsActivity"
             android:parentActivityName=".features.query.QueryActivity" />
+        <activity
+            android:name=".features.addmedia.AddMediaActivity"
+            android:parentActivityName=".features.query.QueryActivity" />
         <activity android:name=".features.query.QueryActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -58,12 +61,7 @@
         <activity
             android:name=".features.resultdetails.Model3DResultDetailActivity"
             android:configChanges="orientation|screenSize" />
-        <activity android:name=".components.drawing.MotionDrawingActivity">
-            <!--<intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>-->
-        </activity>
+        <activity android:name=".components.drawing.MotionDrawingActivity" />
     </application>
 
 </manifest>

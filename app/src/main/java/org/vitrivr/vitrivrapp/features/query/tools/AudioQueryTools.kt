@@ -166,10 +166,8 @@ class AudioQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewMod
     }
 
     fun startPickingFile() {
-        val filePath = ArrayList<String>(1)
         FilePickerBuilder.getInstance()
                 .setMaxCount(1)
-                .setSelectedFiles(filePath)
                 .setActivityTheme(R.style.LibAppTheme)
                 .addFileSupport("Audio", arrayOf("aac", "mp3", "m4a", "wma", "wav", "flac"))
                 .pickFile(context as Activity, LOAD_AUDIO_RESULT)

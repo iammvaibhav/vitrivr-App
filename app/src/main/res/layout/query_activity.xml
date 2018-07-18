@@ -20,6 +20,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:src="@drawable/icon_add"
+                android:onClick="openAddMediaActivity"
                 android:tint="@android:color/white" />
 
             <ImageView

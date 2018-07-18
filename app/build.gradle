@@ -66,6 +66,8 @@ dependencies {
     implementation 'com.google.vr:sdk-base:1.140.0'
     implementation 'com.google.android.gms:play-services-location:15.0.1'
     implementation 'com.h6ah4i.android.widget.verticalseekbar:verticalseekbar:0.7.2'
+    implementation 'net.gotev:uploadservice:3.4.2'
+    implementation 'net.gotev:uploadservice-okhttp:3.4.2'
     implementation(name:'model_viewer', ext:'aar')
 
     testImplementation 'junit:junit:4.12'
