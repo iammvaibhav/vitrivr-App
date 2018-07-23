@@ -5,13 +5,18 @@ import android.arch.lifecycle.ViewModelProviders
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
+import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
+import android.view.Gravity
 import android.view.View
 import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import kotlinx.android.synthetic.main.results_activity.*
+import kotlinx.android.synthetic.main.results_query_refinement.*
 import org.vitrivr.vitrivrapp.R
 import org.vitrivr.vitrivrapp.components.results.EqualSpacingItemDecoration
 import org.vitrivr.vitrivrapp.data.model.enums.MediaType
@@ -28,6 +33,8 @@ class ResultsActivity : AppCompatActivity() {
     val CURRENT_RESULT_VIEW = "CURRENT_RESULT_VIEW"
     val SAVED_LAYOUT_MANAGER = "SAVED_LAYOUT_MANAGER"
     val MEDIA_TYPE_CATEGORIES = "MEDIA_TYPE_CATEGORIES"
+    val MEDIA_TYPE_VISIBILTY = "MEDIA_TYPE_VISIBILTY"
+    val CATEGORY_WEIGHTS = "CATEGORY_WEIGHTS"
 
     companion object {
         val QUERY_TYPE = "QUERY_TYPE"
@@ -53,6 +60,8 @@ class ResultsActivity : AppCompatActivity() {
                 resultsViewModel.restoreCurrentPresenterResults()
                 resultsViewModel.currResultViewType = it.getSerializable(CURRENT_RESULT_VIEW) as ResultViewType
                 resultsViewModel.categoryCount = it.getSerializable(MEDIA_TYPE_CATEGORIES) as HashMap<MediaType, HashSet<String>>
+                resultsViewModel.mediaTypeVisibility = it.getSerializable(MEDIA_TYPE_VISIBILTY) as HashMap<MediaType, Boolean>
+                resultsViewModel.categoryWeight = it.getSerializable(CATEGORY_WEIGHTS) as HashMap<String, Double>
             }
         }
 
@@ -74,6 +83,53 @@ class ResultsActivity : AppCompatActivity() {
                 ResultViewType.SMALL -> viewSmall(view_small)
             }
             queryResultsRV.layoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(SAVED_LAYOUT_MANAGER))
+        }
+
+        weightAdjustmentRecyclerView.layoutManager = LinearLayoutManager(this)
+        drawer.addDrawerListener(object : DrawerLayout.DrawerListener {
+            override fun onDrawerStateChanged(newState: Int) {
+                if (newState == DrawerLayout.STATE_SETTLING && !drawer.isDrawerOpen(Gravity.END)) {
+                    // Drawer started opening
+                    weightAdjustmentRecyclerView.adapter = WeightAdjustmentAdapter(resultsViewModel.categoryWeight)
+
+                    imageFilter.isChecked = resultsViewModel.mediaTypeVisibility[MediaType.IMAGE] ?: false
+                    videoFilter.isChecked = resultsViewModel.mediaTypeVisibility[MediaType.VIDEO] ?: false
+                    audioFilter.isChecked = resultsViewModel.mediaTypeVisibility[MediaType.AUDIO] ?: false
+                    model3dFilter.isChecked = resultsViewModel.mediaTypeVisibility[MediaType.MODEL3D] ?: false
+
+                    for (i in 0 until mediaTypeFilters.childCount) {
+                        val child = mediaTypeFilters.getChildAt(i) as LinearLayout
+                        val childMediaType = MediaType.valueOf((child.getChildAt(0) as TextView).text.toString())
+                        child.visibility = View.GONE
+                        if (childMediaType in resultsViewModel.mediaTypeVisibility) {
+                            child.visibility = View.VISIBLE
+                        }
+                    }
+                }
+            }
+
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
+
+            override fun onDrawerClosed(drawerView: View) {}
+
+            override fun onDrawerOpened(drawerView: View) {}
+        })
+
+        imageFilter.setOnCheckedChangeListener { _, isChecked -> resultsViewModel.mediaTypeVisibility[MediaType.IMAGE] = isChecked }
+        videoFilter.setOnCheckedChangeListener { _, isChecked -> resultsViewModel.mediaTypeVisibility[MediaType.VIDEO] = isChecked }
+        audioFilter.setOnCheckedChangeListener { _, isChecked -> resultsViewModel.mediaTypeVisibility[MediaType.AUDIO] = isChecked }
+        model3dFilter.setOnCheckedChangeListener { _, isChecked -> resultsViewModel.mediaTypeVisibility[MediaType.MODEL3D] = isChecked }
+
+        applyRefinement.setOnClickListener {
+            resultsViewModel.applyRefinements()
+            drawer.closeDrawer(Gravity.END)
+        }
+
+        clearRefinements.setOnClickListener {
+            resultsViewModel.mediaTypeVisibility.forEach { resultsViewModel.mediaTypeVisibility[it.key] = true }
+            resultsViewModel.categoryWeight.forEach { resultsViewModel.categoryWeight[it.key] = 1.0 }
+            resultsViewModel.applyRefinements()
+            drawer.closeDrawer(Gravity.END)
         }
     }
 
@@ -125,9 +181,9 @@ class ResultsActivity : AppCompatActivity() {
 
         if (queryResultsRV.adapter != null) {
             queryResultsRV.adapter = getAdapter(ResultViewType.LARGE)
-            resultsViewModel.getCurrentResults().value?.let {
-                (queryResultsRV.adapter as ViewDetailsAdapter).swap(it)
-            }
+            resultsViewModel.getCurrentResults().observe(this, Observer {
+                it?.let { (queryResultsRV.adapter as ViewDetailsAdapter).swap(it) }
+            })
         }
 
         resultsViewModel.currResultViewType = ResultViewType.LARGE
@@ -143,9 +199,9 @@ class ResultsActivity : AppCompatActivity() {
 
         if (queryResultsRV.adapter != null) {
             queryResultsRV.adapter = getAdapter(ResultViewType.MEDIUM)
-            resultsViewModel.getCurrentResults().value?.let {
-                (queryResultsRV.adapter as ViewDetailsAdapter).swap(it)
-            }
+            resultsViewModel.getCurrentResults().observe(this, Observer {
+                it?.let { (queryResultsRV.adapter as ViewDetailsAdapter).swap(it) }
+            })
         }
         resultsViewModel.currResultViewType = ResultViewType.MEDIUM
     }
@@ -160,11 +216,19 @@ class ResultsActivity : AppCompatActivity() {
 
         if (queryResultsRV.adapter != null) {
             queryResultsRV.adapter = getAdapter(ResultViewType.SMALL)
-            resultsViewModel.getCurrentResults().value?.let {
-                (queryResultsRV.adapter as ViewSmallAdapter).swap(it)
-            }
+            resultsViewModel.getCurrentResults().observe(this, Observer {
+                it?.let { (queryResultsRV.adapter as ViewSmallAdapter).swap(it) }
+            })
         }
         resultsViewModel.currResultViewType = ResultViewType.SMALL
+    }
+
+    fun queryRefinement(view: View) {
+        if (drawer.isDrawerOpen(Gravity.END)) {
+            drawer.closeDrawer(Gravity.END)
+        } else {
+            drawer.openDrawer(Gravity.END)
+        }
     }
 
     private fun select(view: ImageView) {
@@ -182,6 +246,8 @@ class ResultsActivity : AppCompatActivity() {
             bundle.putParcelable(SAVED_LAYOUT_MANAGER, queryResultsRV.layoutManager.onSaveInstanceState())
             bundle.putSerializable(CURRENT_RESULT_VIEW, resultsViewModel.currResultViewType)
             bundle.putSerializable(MEDIA_TYPE_CATEGORIES, resultsViewModel.categoryCount)
+            bundle.putSerializable(MEDIA_TYPE_VISIBILTY, resultsViewModel.mediaTypeVisibility)
+            bundle.putSerializable(CATEGORY_WEIGHTS, resultsViewModel.categoryWeight)
         }
     }
 

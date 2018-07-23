@@ -96,7 +96,8 @@ data class QueryResultPresenterModel(val fileName: String,
                                      val objectId: String,
                                      var numberOfSegments: Int,
                                      var segmentDetail: SegmentDetails,
-                                     val allSegments: ArrayList<SegmentDetails>) : Parcelable {
+                                     val allSegments: ArrayList<SegmentDetails>,
+                                     var visibility: Boolean) : Parcelable {
     constructor(source: Parcel) : this(
             source.readString(),
             source.readString(),
@@ -104,7 +105,8 @@ data class QueryResultPresenterModel(val fileName: String,
             source.readString(),
             source.readInt(),
             source.readParcelable<SegmentDetails>(SegmentDetails::class.java.classLoader),
-            source.createTypedArrayList(SegmentDetails.CREATOR)
+            source.createTypedArrayList(SegmentDetails.CREATOR),
+            1 == source.readInt()
     )
 
     override fun describeContents() = 0
@@ -117,6 +119,7 @@ data class QueryResultPresenterModel(val fileName: String,
         writeInt(numberOfSegments)
         writeParcelable(segmentDetail, 0)
         writeTypedList(allSegments)
+        writeInt((if (visibility) 1 else 0))
     }
 
     companion object {
@@ -131,9 +134,8 @@ data class QueryResultPresenterModel(val fileName: String,
         val allSegments = ArrayList<SegmentDetails>()
         this.allSegments.forEach { allSegments.add(it.copy()) }
         return QueryResultPresenterModel(this.fileName, this.filePath, this.mediaType, this.objectId,
-                this.numberOfSegments, this.segmentDetail.copy(), allSegments)
+                this.numberOfSegments, this.segmentDetail.copy(), allSegments, this.visibility)
     }
-
 }
 
 data class QueryResultCategoryModel(val queryResultSegmentModel: QueryResultSegmentModel,

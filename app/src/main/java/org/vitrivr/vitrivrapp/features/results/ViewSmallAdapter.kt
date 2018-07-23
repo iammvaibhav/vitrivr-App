@@ -25,7 +25,7 @@ class ViewSmallAdapter(initItemsList: List<QueryResultPresenterModel>, val resul
 
     init {
         App.daggerAppComponent.inject(this)
-        items.addAll(initItemsList)
+        items.addAll(initItemsList.filter { it.visibility })
     }
 
     companion object {
@@ -77,7 +77,8 @@ class ViewSmallAdapter(initItemsList: List<QueryResultPresenterModel>, val resul
     }
 
     fun swap(items: List<QueryResultPresenterModel>) {
-        val diffCallback = GradualQueryResultsCallback(this.items, items)
+        val itemsToTake = items.filter { it.visibility }
+        val diffCallback = GradualQueryResultsCallback(this.items, itemsToTake)
         val diffResult = DiffUtil.calculateDiff(diffCallback)
 
         this.items.clear()

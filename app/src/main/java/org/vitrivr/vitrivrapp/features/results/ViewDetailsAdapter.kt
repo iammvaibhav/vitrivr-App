@@ -39,7 +39,7 @@ class ViewDetailsAdapter(initItemsList: List<QueryResultPresenterModel>,
 
     init {
         App.daggerAppComponent.inject(this)
-        items.addAll(initItemsList)
+        items.addAll(initItemsList.filter { it.visibility })
     }
 
     companion object {
@@ -130,11 +130,12 @@ class ViewDetailsAdapter(initItemsList: List<QueryResultPresenterModel>,
     }
 
     fun swap(items: List<QueryResultPresenterModel>) {
-        val diffCallback = GradualQueryResultsCallback(this.items, items)
+        val itemsToTake = items.filter { it.visibility }
+        val diffCallback = GradualQueryResultsCallback(this.items, itemsToTake)
         val diffResult = DiffUtil.calculateDiff(diffCallback)
 
         this.items.clear()
-        this.items.addAll(items)
+        this.items.addAll(itemsToTake)
         diffResult.dispatchUpdatesTo(this)
     }
 }

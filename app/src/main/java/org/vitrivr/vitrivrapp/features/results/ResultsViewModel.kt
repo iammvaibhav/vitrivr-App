@@ -18,6 +18,7 @@ import org.vitrivr.vitrivrapp.data.repository.QueryResultsRepository
 import java.util.*
 import javax.inject.Inject
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class ResultsViewModel : ViewModel() {
 
@@ -29,6 +30,8 @@ class ResultsViewModel : ViewModel() {
     lateinit var gson: Gson
 
     var categoryCount: HashMap<MediaType, HashSet<String>> = HashMap()
+    var mediaTypeVisibility: HashMap<MediaType, Boolean> = HashMap()
+    var categoryWeight: HashMap<String, Double> = HashMap()
 
     private val resultPresenterList = ArrayList<QueryResultPresenterModel>()
     private val sortedResultPresenterList = ArrayList<QueryResultPresenterModel>()
@@ -50,6 +53,8 @@ class ResultsViewModel : ViewModel() {
                 resultPresenterList.clear()
                 insertedObjects.clear()
                 categoryCount.clear()
+                mediaTypeVisibility.clear()
+                categoryWeight.clear()
 
                 queryResultSegmentModel = null
                 queryResultObjectModel = null
@@ -70,7 +75,9 @@ class ResultsViewModel : ViewModel() {
                     val availableMediaTypes = HashSet<MediaType>()
                     queryResultObjectModel!!.content.forEach {
                         availableMediaTypes.add(it.mediatype)
+                        mediaTypeVisibility[it.mediatype] = true
                     }
+                    categoryWeight[queryResultSimilarityModel!!.category] = 1.0
 
                     availableMediaTypes.forEach {
                         if (categoryCount.containsKey(it)) {
@@ -145,7 +152,7 @@ class ResultsViewModel : ViewModel() {
 
                     val presenterItem = QueryResultPresenterModel(segmentObject.name, segmentObject.path,
                             segmentObject.mediatype, segment.objectId,
-                            0, dummySegmentObject, ArrayList())
+                            0, dummySegmentObject, ArrayList(), true)
 
                     val segmentDetails = SegmentDetails(segment.segmentId, 0.0, segment.startabs, HashMap())
                     segmentDetails.categoriesWeights[category] = segmentWeight
@@ -197,10 +204,14 @@ class ResultsViewModel : ViewModel() {
         var highestMatchValue: Double
         var segmentDetailObject: SegmentDetails?
         for (presenterObject in resultPresenterList) {
-            highestMatchValue = 0.0
+            highestMatchValue = -1.0
             segmentDetailObject = null
             presenterObject.allSegments.forEach {
-                it.matchValue = it.categoriesWeights.values.sum() / categoryCount[presenterObject.mediaType]!!.size
+                var weightSum = 0.0
+                it.categoriesWeights.forEach {
+                    weightSum += (categoryWeight[it.key] ?: 1.0) * it.value
+                }
+                it.matchValue = weightSum / categoryCount[presenterObject.mediaType]!!.size
                 if (it.matchValue > highestMatchValue) {
                     highestMatchValue = it.matchValue
                     segmentDetailObject = it
@@ -208,7 +219,16 @@ class ResultsViewModel : ViewModel() {
             }
             presenterObject.segmentDetail = segmentDetailObject!!
             presenterObject.numberOfSegments = presenterObject.allSegments.size
+            presenterObject.visibility = mediaTypeVisibility[presenterObject.mediaType] ?: false
         }
+    }
+
+    fun applyRefinements() {
+        processPresenterResults()
+        sortedResultPresenterList.clear()
+        resultPresenterList.forEach { sortedResultPresenterList.add(it.copy()) } //deep copy required. TODO("Find some better solution")
+        sortedResultPresenterList.sortByDescending { it.segmentDetail.matchValue }
+        liveResultPresenterList.postValue(sortedResultPresenterList)
     }
 
     fun queryToJson(): String {
