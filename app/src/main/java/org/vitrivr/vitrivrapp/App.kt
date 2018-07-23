@@ -9,6 +9,9 @@ import org.vitrivr.vitrivrapp.di.AppModule
 import org.vitrivr.vitrivrapp.di.DaggerAppComponent
 import javax.inject.Inject
 
+/**
+ * Custom Application class used to provide DaggerAppComponent and initialize services.
+ */
 class App: Application() {
 
     companion object {
@@ -20,10 +23,21 @@ class App: Application() {
 
     override fun onCreate() {
         super.onCreate()
-        ModelViewerApplication.setResources(resources)
+
+        /**
+         * Configuring Dagger
+         */
         daggerAppComponent = DaggerAppComponent.builder().appModule(AppModule(this)).build() as DaggerAppComponent
         daggerAppComponent.inject(this)
 
+        /**
+         * Configuring 3D Model Viewer
+         */
+        ModelViewerApplication.setResources(resources)
+
+        /**
+         * Configuring UploadService
+         */
         UploadService.NAMESPACE = BuildConfig.APPLICATION_ID
         UploadService.HTTP_STACK = OkHttpStack(okHttpClient)
     }
