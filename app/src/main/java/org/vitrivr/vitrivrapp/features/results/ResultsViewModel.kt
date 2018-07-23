@@ -112,8 +112,8 @@ class ResultsViewModel : ViewModel() {
         App.daggerAppComponent.inject(this)
     }
 
-    fun getQueryResults(query: String, failure: (reason: String) -> Unit, closed: () -> Unit): LiveData<List<QueryResultPresenterModel>> {
-        val queryResult = queryResultsRepository.getQueryResults(query)
+    fun getQueryResults(query: String, failure: (reason: String) -> Unit, closed: () -> Unit): LiveData<List<QueryResultPresenterModel>>? {
+        val queryResult = queryResultsRepository.getQueryResults(query) ?: return null
         queryResult.subscribe(queryResultObserver, Consumer {
             failure(it.message ?: "Failure")
         }, Action { closed() })

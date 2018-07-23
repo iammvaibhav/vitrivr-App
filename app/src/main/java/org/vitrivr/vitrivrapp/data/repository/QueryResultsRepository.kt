@@ -20,15 +20,15 @@ class QueryResultsRepository {
     lateinit var queryResultsService: QueryResultsService
     private val spHelper = SharedPreferenceHelper(QUERY_RESULTS_KEY)
 
-
     init {
         App.daggerAppComponent.inject(this)
     }
 
-    fun getQueryResults(query: String): Observable<QueryResultBaseModel> {
-        val serverSettings = settingsService.getCineastAPISettings()
-        return queryResultsService.getQueryResults(query,
-                "ws://${serverSettings?.address}:${serverSettings?.port}/api/v1/websocket")
+    fun getQueryResults(query: String): Observable<QueryResultBaseModel>? {
+        settingsService.getWebSocketEndpointURL()?.let {
+            return queryResultsService.getQueryResults(query, it)
+        }
+        return null
     }
 
     fun putCurrentPresenterResults(results: List<QueryResultPresenterModel>) {

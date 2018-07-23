@@ -2,6 +2,7 @@ package org.vitrivr.vitrivrapp.features.results
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
@@ -22,7 +23,9 @@ import org.vitrivr.vitrivrapp.components.results.EqualSpacingItemDecoration
 import org.vitrivr.vitrivrapp.data.model.enums.MediaType
 import org.vitrivr.vitrivrapp.data.model.enums.MessageType
 import org.vitrivr.vitrivrapp.data.model.enums.ResultViewType
+import org.vitrivr.vitrivrapp.features.settings.SettingsActivity
 import org.vitrivr.vitrivrapp.utils.px
+import org.vitrivr.vitrivrapp.utils.showToast
 import java.util.*
 
 class ResultsActivity : AppCompatActivity() {
@@ -137,25 +140,30 @@ class ResultsActivity : AppCompatActivity() {
         progressBar.visibility = View.VISIBLE
         val queryResults = resultsViewModel.getQueryResults(query, ::failure, ::closed)
 
-        queryResults.observe(this, Observer {
-            it?.let {
-                if (queryResultsRV.adapter == null) {
-                    if (resultsViewModel.currResultViewType == ResultViewType.LARGE || resultsViewModel.currResultViewType == ResultViewType.MEDIUM) {
-                        queryResultsRV.adapter = getAdapter(resultsViewModel.currResultViewType)
-                        (queryResultsRV.adapter as ViewDetailsAdapter).swap(it)
+        if (queryResults == null) {
+            "Cineast API Settings are not configured. Please configure it first before querying".showToast(this)
+            startActivity(Intent(this, SettingsActivity::class.java))
+        } else {
+            queryResults.observe(this, Observer {
+                it?.let {
+                    if (queryResultsRV.adapter == null) {
+                        if (resultsViewModel.currResultViewType == ResultViewType.LARGE || resultsViewModel.currResultViewType == ResultViewType.MEDIUM) {
+                            queryResultsRV.adapter = getAdapter(resultsViewModel.currResultViewType)
+                            (queryResultsRV.adapter as ViewDetailsAdapter).swap(it)
+                        } else {
+                            queryResultsRV.adapter = getAdapter(ResultViewType.SMALL)
+                            (queryResultsRV.adapter as ViewSmallAdapter).swap(it)
+                        }
                     } else {
-                        queryResultsRV.adapter = getAdapter(ResultViewType.SMALL)
-                        (queryResultsRV.adapter as ViewSmallAdapter).swap(it)
-                    }
-                } else {
-                    if (resultsViewModel.currResultViewType == ResultViewType.LARGE || resultsViewModel.currResultViewType == ResultViewType.MEDIUM) {
-                        (queryResultsRV.adapter as ViewDetailsAdapter).swap(it)
-                    } else {
-                        (queryResultsRV.adapter as ViewSmallAdapter).swap(it)
+                        if (resultsViewModel.currResultViewType == ResultViewType.LARGE || resultsViewModel.currResultViewType == ResultViewType.MEDIUM) {
+                            (queryResultsRV.adapter as ViewDetailsAdapter).swap(it)
+                        } else {
+                            (queryResultsRV.adapter as ViewSmallAdapter).swap(it)
+                        }
                     }
                 }
-            }
-        })
+            })
+        }
     }
 
     private fun failure(reason: String) {

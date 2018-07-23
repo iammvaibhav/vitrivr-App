@@ -41,4 +41,14 @@ class SettingsService {
     fun saveResourcesSettings(resourcesModel: ResourcesModel) {
         spHelper.putObject(RESOURCES_SETTINGS_KEY, resourcesModel)
     }
+
+    /**
+     * @return websocket endpoint URL for sending queries if Cineast API Settings exists. If not, returns null
+     */
+    fun getWebSocketEndpointURL(): String? {
+        getCineastAPISettings()?.let {
+            return "${it.protocol}://${it.address}:${it.port}/api/v1/websocket"
+        }
+        return null
+    }
 }
