@@ -1,19 +1,17 @@
 package org.vitrivr.vitrivrapp.data.repository
 
-import android.content.Context
 import android.net.Uri
 import org.vitrivr.vitrivrapp.data.helper.SharedPreferenceHelper
 import org.vitrivr.vitrivrapp.data.model.query.QueryModel
-import javax.inject.Inject
 
-class QueryRepository @Inject constructor(context: Context) {
+class QueryRepository {
 
     val QUERY_KEY = "QUERY_KEY"
     val QUERY_MODEL_KEY = "QUERY_MODEL_KEY"
     val QUERY_3D_MODEL_URI = "QUERY_3D_MODEL_URI"
     val MOTION_DRAWING_DATA = "MOTION_DRAWING_DATA"
-    private val spHelper = SharedPreferenceHelper(context, QUERY_KEY)
-    private val motionSpHelper = SharedPreferenceHelper(context, MOTION_DRAWING_DATA)
+    private val spHelper = SharedPreferenceHelper(QUERY_KEY)
+    private val motionSpHelper = SharedPreferenceHelper(MOTION_DRAWING_DATA)
 
     fun putQueryObject(queryModel: QueryModel) {
         spHelper.putObject(QUERY_MODEL_KEY, queryModel)

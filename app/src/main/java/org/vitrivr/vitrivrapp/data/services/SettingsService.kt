@@ -1,17 +1,17 @@
 package org.vitrivr.vitrivrapp.data.services
 
-import android.content.Context
 import org.vitrivr.vitrivrapp.data.helper.SharedPreferenceHelper
 import org.vitrivr.vitrivrapp.data.model.settings.ResourcesModel
 import org.vitrivr.vitrivrapp.data.model.settings.ServerModel
-import javax.inject.Inject
 
-class SettingsService @Inject constructor(context: Context) {
+@Suppress("PrivatePropertyName")
+class SettingsService {
 
-    val API_SETTINGS_KEY = "API_SETTINGS"
+    private val API_SETTINGS_KEY = "API_SETTINGS"
     private val SERVER_SETTINGS_KEY = "SERVER_SETTINGS_KEY"
     private val RESOURCES_SETTINGS_KEY = "RESOURCES_SETTINGS_KEY"
-    private val spHelper = SharedPreferenceHelper(context, API_SETTINGS_KEY)
+
+    private val spHelper = SharedPreferenceHelper(API_SETTINGS_KEY)
 
     fun getServerSettings(): ServerModel? = spHelper.getObject(SERVER_SETTINGS_KEY, ServerModel::class.java)
 

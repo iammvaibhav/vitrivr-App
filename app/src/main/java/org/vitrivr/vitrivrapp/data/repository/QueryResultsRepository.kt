@@ -1,6 +1,5 @@
 package org.vitrivr.vitrivrapp.data.repository
 
-import android.content.Context
 import io.reactivex.Observable
 import org.vitrivr.vitrivrapp.App
 import org.vitrivr.vitrivrapp.data.helper.SharedPreferenceHelper
@@ -10,7 +9,7 @@ import org.vitrivr.vitrivrapp.data.services.QueryResultsService
 import org.vitrivr.vitrivrapp.data.services.SettingsService
 import javax.inject.Inject
 
-class QueryResultsRepository @Inject constructor(context: Context) {
+class QueryResultsRepository {
 
     val QUERY_RESULTS_KEY = "QUERY_RESULTS_KEY"
     val CURRENT_PRESENTER_RESULTS = "CURRENT_PRESENTER_RESULTS"
@@ -19,7 +18,7 @@ class QueryResultsRepository @Inject constructor(context: Context) {
     lateinit var settingsService: SettingsService
     @Inject
     lateinit var queryResultsService: QueryResultsService
-    private val spHelper = SharedPreferenceHelper(context, QUERY_RESULTS_KEY)
+    private val spHelper = SharedPreferenceHelper(QUERY_RESULTS_KEY)
 
 
     init {

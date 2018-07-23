@@ -1,7 +1,6 @@
 package org.vitrivr.vitrivrapp.components.drawing
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
@@ -12,7 +11,6 @@ import android.view.View
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.motion_drawing_activity.*
-import org.vitrivr.vitrivrapp.App
 import org.vitrivr.vitrivrapp.R
 import org.vitrivr.vitrivrapp.data.helper.SharedPreferenceHelper
 import org.vitrivr.vitrivrapp.data.model.query.Coordinate
@@ -20,12 +18,9 @@ import org.vitrivr.vitrivrapp.data.model.query.MotionObject
 import org.vitrivr.vitrivrapp.data.model.query.MotionQueryDataModel
 import java.io.File
 import java.io.FileOutputStream
-import javax.inject.Inject
 
 class MotionDrawingActivity : AppCompatActivity() {
 
-    @Inject
-    lateinit var context: Context
     var spHelper: SharedPreferenceHelper
 
     val MOTION_DRAWING_DATA = "MOTION_DRAWING_DATA"
@@ -37,8 +32,7 @@ class MotionDrawingActivity : AppCompatActivity() {
     lateinit var motionDrawingCanvas: MotionDrawableImageView
 
     init {
-        App.daggerAppComponent.inject(this)
-        spHelper = SharedPreferenceHelper(context, MOTION_DRAWING_DATA)
+        spHelper = SharedPreferenceHelper(MOTION_DRAWING_DATA)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
