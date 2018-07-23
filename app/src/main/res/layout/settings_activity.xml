@@ -48,6 +48,54 @@
                     android:textStyle="bold" />
             </FrameLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="12dp"
+                    android:text="Protocol:"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <RadioGroup
+                    android:id="@+id/protocol"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.7"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/wsProtocol"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:text="ws"
+                        android:textColor="#757575"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <RadioButton
+                        android:id="@+id/wssProtocol"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:text="wss"
+                        android:textColor="#757575"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                </RadioGroup>
+
+            </LinearLayout>
+
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -58,8 +106,7 @@
                     android:id="@+id/serverAddress"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/server_address_hint"
-                    android:text="@{settingsViewModel.getServerSettings().address}"/>
+                    android:hint="@string/server_address_hint" />
 
             </android.support.design.widget.TextInputLayout>
 
@@ -74,18 +121,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/server_port_hint"
-                    android:inputType="number"
-                    android:text='@{settingsViewModel.getServerSettings().port == 0 ? "" : String.valueOf(settingsViewModel.getServerSettings().port)}'/>
+                    android:inputType="number" />
 
             </android.support.design.widget.TextInputLayout>
 
             <Button
-                android:id="@+id/cineastSettingsSave"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:backgroundTint="@color/colorAccent"
                 android:text="@string/save_button_text"
+                android:onClick="saveCineastSettings"
                 android:textColor="@android:color/white" />
 
             <FrameLayout
@@ -124,8 +170,7 @@
                     android:id="@+id/thumbnailsURL"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/thumbnails_url_hint"
-                    android:text="@{settingsViewModel.getResourcesSettings().thumbnailsURL}"/>
+                    android:hint="@string/thumbnails_url_hint" />
 
             </android.support.design.widget.TextInputLayout>
 
@@ -153,13 +198,13 @@
             </FrameLayout>
 
             <Button
-                android:id="@+id/thumbnailsSelectFolder"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="24dp"
                 android:backgroundTint="@color/colorAccent"
                 android:text="@string/select_folder_text"
+                android:onClick="selectThumbnailsFolder"
                 android:textColor="@android:color/white" />
 
             <TextView
@@ -180,8 +225,7 @@
                     android:id="@+id/objectsURL"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/objects_url_hint"
-                    android:text="@{settingsViewModel.getResourcesSettings().objectsURL}"/>
+                    android:hint="@string/objects_url_hint" />
 
             </android.support.design.widget.TextInputLayout>
 
@@ -209,22 +253,22 @@
             </FrameLayout>
 
             <Button
-                android:id="@+id/objectsSelectFolder"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:backgroundTint="@color/colorAccent"
                 android:text="@string/select_folder_text"
+                android:onClick="selectObjectsFolder"
                 android:textColor="@android:color/white" />
 
             <Button
-                android:id="@+id/resourcesSettingsSave"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="16dp"
                 android:backgroundTint="@color/colorAccent"
                 android:text="@string/save_button_text"
+                android:onClick="saveResourcesSettings"
                 android:textColor="@android:color/white" />
 
         </LinearLayout>

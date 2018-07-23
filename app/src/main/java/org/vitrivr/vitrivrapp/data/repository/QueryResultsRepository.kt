@@ -26,7 +26,7 @@ class QueryResultsRepository {
     }
 
     fun getQueryResults(query: String): Observable<QueryResultBaseModel> {
-        val serverSettings = settingsService.getServerSettings()
+        val serverSettings = settingsService.getCineastAPISettings()
         return queryResultsService.getQueryResults(query,
                 "ws://${serverSettings?.address}:${serverSettings?.port}/api/v1/websocket")
     }

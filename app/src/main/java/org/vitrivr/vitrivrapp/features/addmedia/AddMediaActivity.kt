@@ -123,7 +123,7 @@ class AddMediaActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val serverSettings = settingsService.getServerSettings()
+            val serverSettings = settingsService.getCineastAPISettings()
             if (serverSettings != null) {
                 val uploadAddress = "http://${serverSettings.address}:${serverSettings.port}/api/v1/extractFiles"
                 Log.e("config", JSONObject(Gson().toJson(extractionConfig)).toString(4))
