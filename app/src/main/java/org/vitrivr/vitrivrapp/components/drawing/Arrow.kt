@@ -5,6 +5,9 @@ import android.graphics.Path
 import android.graphics.PointF
 import org.vitrivr.vitrivrapp.utils.px
 
+/**
+ * This class represent an arrow used in MotionDrawableImageView
+ */
 class Arrow {
 
     @Transient

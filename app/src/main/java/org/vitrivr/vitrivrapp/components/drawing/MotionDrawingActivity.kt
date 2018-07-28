@@ -1,6 +1,7 @@
 package org.vitrivr.vitrivrapp.components.drawing
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
@@ -19,20 +20,33 @@ import org.vitrivr.vitrivrapp.data.model.query.MotionQueryDataModel
 import java.io.File
 import java.io.FileOutputStream
 
+@Suppress("PropertyName", "PrivatePropertyName", "NAME_SHADOWING", "UNUSED_PARAMETER")
+/**
+ * This class extends AppCompatImageView to provide motion drawing capabilities on it.
+ */
 class MotionDrawingActivity : AppCompatActivity() {
 
-    var spHelper: SharedPreferenceHelper
+    companion object {
+        const val INTENT_EXTRA_CONTAINER_ID = "INTENT_EXTRA_CONTAINER_ID"
 
-    val MOTION_DRAWING_DATA = "MOTION_DRAWING_DATA"
-    lateinit var PATH_LIST: String
-    lateinit var ARROW_LIST: String
-    lateinit var PATH_LIST_SAVE: String
-    lateinit var ARROW_LIST_SAVE: String
-    lateinit var MOTION_QUERY_KEY: String
+        fun getResultantMotionImageFile(context: Context, containerID: Long): File {
+            return File(context.filesDir, "motionQuery_$containerID.png")
+        }
+    }
+
+    private var spHelper: SharedPreferenceHelper
+
+    private val PREF_NAME_MOTION_DRAWING_DATA = "PREF_NAME_MOTION_DRAWING_DATA"
+
+    private lateinit var PATH_LIST: String
+    private lateinit var ARROW_LIST: String
+    private lateinit var PATH_LIST_SAVE: String
+    private lateinit var ARROW_LIST_SAVE: String
+    private lateinit var resultantImage: String
     lateinit var motionDrawingCanvas: MotionDrawableImageView
 
     init {
-        spHelper = SharedPreferenceHelper(MOTION_DRAWING_DATA)
+        spHelper = SharedPreferenceHelper(PREF_NAME_MOTION_DRAWING_DATA)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,12 +57,13 @@ class MotionDrawingActivity : AppCompatActivity() {
 
         motionDrawingCanvas = findViewById(R.id.motionDrawingCanvas)
 
-        val containerID = intent.getLongExtra("containerID", 0)
+        val containerID = intent.getLongExtra(INTENT_EXTRA_CONTAINER_ID, 0)
         PATH_LIST = "PATH_LIST_$containerID"
         ARROW_LIST = "ARROW_LIST_$containerID"
         PATH_LIST_SAVE = "PATH_LIST_SAVE_$containerID"
         ARROW_LIST_SAVE = "ARROW_LIST_SAVE_$containerID"
-        MOTION_QUERY_KEY = "MOTION_QUERY_KEY_$containerID.png"
+
+        resultantImage = "motionQuery_$containerID.png"
 
         motionDrawingCanvas.post {
             val bitmap = Bitmap.createBitmap(motionDrawingCanvas.width, motionDrawingCanvas.height, Bitmap.Config.ARGB_8888)
@@ -107,7 +122,7 @@ class MotionDrawingActivity : AppCompatActivity() {
         spHelper.putListObject(ARROW_LIST_SAVE, serializableArrow)
 
         val dir = filesDir
-        val file = File(dir, MOTION_QUERY_KEY)
+        val file = File(dir, resultantImage)
         val stream = FileOutputStream(file)
         (motionDrawingCanvas.drawable as BitmapDrawable).bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
         stream.flush()
@@ -123,7 +138,7 @@ class MotionDrawingActivity : AppCompatActivity() {
 
     fun clear(view: View) {
         motionDrawingCanvas.clear()
-        val file = File(filesDir, MOTION_QUERY_KEY)
+        val file = File(filesDir, resultantImage)
         if (file.exists()) file.delete()
         spHelper.removeKey(PATH_LIST)
         spHelper.removeKey(ARROW_LIST)

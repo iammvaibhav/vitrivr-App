@@ -2,6 +2,7 @@ package org.vitrivr.vitrivrapp.data.model.query
 
 import android.os.Parcel
 import android.os.Parcelable
+import org.vitrivr.vitrivrapp.data.gson.Exclude
 import org.vitrivr.vitrivrapp.data.model.enums.MessageType
 import org.vitrivr.vitrivrapp.data.model.enums.QueryTermType
 
@@ -29,7 +30,7 @@ data class QueryTermModel(var data: String, val categories: ArrayList<String>, v
     }
 }
 
-data class QueryContainerModel(@Transient val id: Long, @Transient var description: String, val terms: ArrayList<QueryTermModel>) : Parcelable {
+data class QueryContainerModel(@Exclude val id: Long, @Exclude var description: String, val terms: ArrayList<QueryTermModel>) : Parcelable {
     constructor(source: Parcel) : this(
             source.readLong(),
             source.readString(),

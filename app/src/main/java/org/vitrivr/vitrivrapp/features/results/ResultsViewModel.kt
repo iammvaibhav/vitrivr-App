@@ -3,11 +3,14 @@ package org.vitrivr.vitrivrapp.features.results
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
+import android.util.Log
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import io.reactivex.functions.Action
 import io.reactivex.functions.Consumer
 import org.vitrivr.vitrivrapp.App
+import org.vitrivr.vitrivrapp.data.gson.AnnotationExclusionStrategy
 import org.vitrivr.vitrivrapp.data.model.enums.MediaType
 import org.vitrivr.vitrivrapp.data.model.enums.MessageType
 import org.vitrivr.vitrivrapp.data.model.enums.ResultViewType
@@ -224,15 +227,18 @@ class ResultsViewModel : ViewModel() {
     }
 
     fun applyRefinements() {
+        Log.e("size before", sortedResultPresenterList.size.toString())
         processPresenterResults()
         sortedResultPresenterList.clear()
         resultPresenterList.forEach { sortedResultPresenterList.add(it.copy()) } //deep copy required. TODO("Find some better solution")
         sortedResultPresenterList.sortByDescending { it.segmentDetail.matchValue }
         liveResultPresenterList.postValue(sortedResultPresenterList)
+        Log.e("size after", sortedResultPresenterList.size.toString())
     }
 
     fun queryToJson(): String {
-        return gson.toJson(queryRepository.getQueryObject(), object : TypeToken<QueryModel>() {}.type)
+        return GsonBuilder().setExclusionStrategies(AnnotationExclusionStrategy()).create()
+                .toJson(queryRepository.getQueryObject(), object : TypeToken<QueryModel>() {}.type)
     }
 
     fun saveCurrentPresenterResults() {
@@ -242,6 +248,9 @@ class ResultsViewModel : ViewModel() {
     }
 
     fun restoreCurrentPresenterResults() {
-        getCurrentResults().value = queryResultsRepository.getCurrentPresenterResults()
+        queryResultsRepository.getCurrentPresenterResults()?.let {
+            liveResultPresenterList.value = it
+            resultPresenterList.addAll(it)
+        }
     }
 }

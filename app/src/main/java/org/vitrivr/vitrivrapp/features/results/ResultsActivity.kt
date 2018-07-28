@@ -186,7 +186,6 @@ class ResultsActivity : AppCompatActivity() {
         }
         queryResultsRV.addItemDecoration(EqualSpacingItemDecoration(8.px, EqualSpacingItemDecoration.VERTICAL))
         queryResultsRV.layoutManager = LinearLayoutManager(this)
-
         if (queryResultsRV.adapter != null) {
             queryResultsRV.adapter = getAdapter(ResultViewType.LARGE)
             resultsViewModel.getCurrentResults().observe(this, Observer {

@@ -1,5 +1,6 @@
 package org.vitrivr.vitrivrapp.data.repository
 
+import com.google.gson.reflect.TypeToken
 import io.reactivex.Observable
 import org.vitrivr.vitrivrapp.App
 import org.vitrivr.vitrivrapp.data.helper.SharedPreferenceHelper
@@ -36,8 +37,7 @@ class QueryResultsRepository {
     }
 
     fun getCurrentPresenterResults(): List<QueryResultPresenterModel>? {
-        return spHelper.getObjectList(CURRENT_PRESENTER_RESULTS)
+        val typetoken = object : TypeToken<List<QueryResultPresenterModel>>() {}
+        return spHelper.getObjectList(CURRENT_PRESENTER_RESULTS, typetoken)
     }
-
-
 }

@@ -54,6 +54,28 @@ class SharedPreferenceHelper(prefName: String) {
     }
 
     /**
+     * puts a long value with given key
+     * @param key   key to identify given long value
+     * @param value long value to store
+     */
+    fun putLong(key: String, value: Long) {
+        preferences.edit().putString(key, value.toString()).apply()
+    }
+
+    /**
+     * gets a long with given key
+     * @param key key of the long value
+     * @return if the given key exists, returns the value of the key else returns null
+     */
+    fun getLong(key: String): Long? {
+        return try {
+            preferences.getString(key, null).toLongOrNull()
+        } catch (e: ClassCastException) {
+            null
+        }
+    }
+
+    /**
      * puts an object obj with the given key. Internally, it serializes the object to JSON
      * and store it as a string
      * @param key key to identify given object
@@ -94,10 +116,10 @@ class SharedPreferenceHelper(prefName: String) {
      * @param key key of the list object
      * @return if the given key exists, returns the list object with the given key else returns null
      */
-    fun <T> getObjectList(key: String): List<T>? {
+    fun <T> getObjectList(key: String, typeToken: TypeToken<List<T>>): List<T>? {
         return try {
             val json = getString(key)
-            gson.fromJson<List<T>>(json, object : TypeToken<List<T>>() {}.type)
+            gson.fromJson<List<T>>(json, typeToken.type)
         } catch (e: ClassCastException) {
             null
         } catch (e: JsonSyntaxException) {

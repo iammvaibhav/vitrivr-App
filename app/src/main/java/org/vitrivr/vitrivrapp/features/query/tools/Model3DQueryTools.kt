@@ -1,25 +1,20 @@
 package org.vitrivr.vitrivrapp.features.query.tools
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
 import android.support.v7.widget.CardView
 import android.util.AttributeSet
 import android.util.Base64
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.ConsoleMessage
 import android.webkit.JavascriptInterface
-import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.*
 import com.dmitrybrant.modelviewer.ModelActivity
@@ -31,14 +26,18 @@ import org.vitrivr.vitrivrapp.features.query.MODEL_CHOOSER_REQUEST_CODE
 import org.vitrivr.vitrivrapp.features.query.MODEL_CHOOSER_RESULT
 import org.vitrivr.vitrivrapp.features.query.MODEL_DRAWING_RESULT
 import org.vitrivr.vitrivrapp.features.query.QueryViewModel
+import org.vitrivr.vitrivrapp.utils.checkAndRequestPermission
 import java.io.ByteArrayOutputStream
 import java.io.File
 
+@SuppressLint("ViewConstructor")
+/**
+ * query tools for constructing model3d queries
+ */
 class Model3DQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewModel,
                                                   wasChecked: Boolean,
                                                   toolsContainer: ViewGroup,
                                                   context: Context,
-                                                  val openTerm: () -> Unit,
                                                   attrs: AttributeSet? = null,
                                                   defStyleAttr: Int = 0,
                                                   defStyleRes: Int = 0) : View(context, attrs, defStyleAttr, defStyleRes) {
@@ -49,7 +48,7 @@ class Model3DQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewM
     val sketchContainer: CardView
     val imagePreview: ImageView
     val loadModelContainer: LinearLayout
-    val sketch2dSwitch: Switch
+    private val sketch2dSwitch: Switch
     val status: TextView
 
     init {
@@ -66,11 +65,7 @@ class Model3DQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewM
         resolutionBalanceContainer = toolsContainer.findViewById(R.id.resolutionBalanceContainer)
 
         loadModel.setOnClickListener {
-            if ((ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
-                            != PackageManager.PERMISSION_GRANTED)) {
-                ActivityCompat.requestPermissions(context as Activity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                        MODEL_CHOOSER_REQUEST_CODE)
-            } else {
+            (context as Activity).checkAndRequestPermission(Manifest.permission.READ_EXTERNAL_STORAGE, MODEL_CHOOSER_REQUEST_CODE) {
                 startModelChooserActivity()
             }
         }
@@ -85,21 +80,21 @@ class Model3DQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewM
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
-        sketch2dSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
+        sketch2dSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 imagePreview.setImageDrawable(null)
                 loadModelContainer.visibility = GONE
                 sketchContainer.visibility = VISIBLE
                 resolutionBalanceContainer.visibility = GONE
-                queryViewModel.putModelUri(null, queryViewModel.currContainerID)
+                queryViewModel.putModelUri(queryViewModel.currContainerID, null)
             } else {
                 status.text = "No Model Available"
                 status.setOnClickListener(null)
                 resolutionBalanceContainer.visibility = VISIBLE
                 loadModelContainer.visibility = VISIBLE
                 sketchContainer.visibility = GONE
-                val preview = File(context.filesDir, "imageQuery_image_${queryViewModel.currContainerID}_MODEL3D.png")
-                val orig = File(context.filesDir, "imageQuery_image_orig_${queryViewModel.currContainerID}_MODEL3D.png")
+                val preview = DrawingActivity.getResultantImageFile(context, queryViewModel.currContainerID, QueryTermType.MODEL3D)
+                val orig = DrawingActivity.getOriginalImageFile(context, queryViewModel.currContainerID, QueryTermType.MODEL3D)
 
                 if (preview.exists()) preview.delete()
                 if (orig.exists()) orig.delete()
@@ -108,8 +103,8 @@ class Model3DQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewM
 
         imagePreview.setOnClickListener {
             val intent = Intent(context, DrawingActivity::class.java)
-            intent.putExtra("containerID", queryViewModel.currContainerID)
-            intent.putExtra("termType", QueryTermType.MODEL3D.name)
+            intent.putExtra(DrawingActivity.INTENT_EXTRA_CONTAINER_ID, queryViewModel.currContainerID)
+            intent.putExtra(DrawingActivity.INTENT_EXTRA_TERM_TYPE, QueryTermType.MODEL3D.name)
             (context as Activity).startActivityForResult(intent, MODEL_DRAWING_RESULT)
         }
 
@@ -122,7 +117,7 @@ class Model3DQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewM
 
     private fun restoreState() {
         //restore state
-        val preview = File(context.filesDir, "imageQuery_image_${queryViewModel.currContainerID}_MODEL3D.png")
+        val preview = DrawingActivity.getResultantImageFile(context, queryViewModel.currContainerID, QueryTermType.MODEL3D)
         if (preview.exists()) {
             //2D sketch
             sketch2dSwitch.isChecked = true
@@ -133,7 +128,7 @@ class Model3DQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewM
             resolutionBalance.progress = queryViewModel.getBalance(queryViewModel.currContainerID, QueryTermType.MODEL3D)
             queryViewModel.getModelUri(queryViewModel.currContainerID)?.let {
                 val uri = it
-                status.text = "Model Loaded. Tap to view"
+                status.text = context.getString(R.string.model_loaded)
                 status.setOnClickListener {
                     val modelIntent = Intent(context, ModelActivity::class.java)
                     modelIntent.data = uri
@@ -143,6 +138,9 @@ class Model3DQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewM
         }
     }
 
+    /**
+     * starts the model chooser activity
+     */
     fun startModelChooserActivity() {
         MaterialFilePicker()
                 .withActivity(context as Activity)
@@ -150,41 +148,74 @@ class Model3DQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewM
                 .start()
     }
 
+    /**
+     * handles chosen model result.
+     * WebView and JavaScript interface is required to use three.js javascript library
+     */
     fun handleChosenModel(filePath: String) {
+        status.text = context.getString(R.string.loading_model)
         val uri = Uri.fromFile(File(filePath))
-        val html = getHTMLforModel(uri)
+        val html = getHTMLForModel(uri)
 
         if (html == null) {
             Toast.makeText(context, "Error! Please choose obj/stl file only", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val webview = WebView(context)
-        webview.settings.allowFileAccess = true
-        webview.settings.javaScriptEnabled = true
-        webview.settings.allowUniversalAccessFromFileURLs = true
-        webview.settings.allowFileAccessFromFileURLs = true
+        /**
+         * prepare webView
+         */
+        val webView = WebView(context)
+        webView.settings.allowFileAccess = true
+        webView.settings.javaScriptEnabled = true
+        webView.settings.allowUniversalAccessFromFileURLs = true
+        webView.settings.allowFileAccessFromFileURLs = true
 
-        webview.addJavascriptInterface(WebViewJavaScriptInterface {
+        webView.addJavascriptInterface(WebViewJavaScriptInterface {
             (context as Activity).runOnUiThread {
-                queryViewModel.putModelUri(uri, queryViewModel.currContainerID)
+                queryViewModel.putModelUri(queryViewModel.currContainerID, uri)
                 queryViewModel.setDataOfQueryTerm(queryViewModel.currContainerID, QueryTermType.MODEL3D, it)
-                Log.e("base64", it)
-                openTerm()
+
+                status.text = context.getText(R.string.model_loaded)
+                status.setOnClickListener {
+                    val modelIntent = Intent(context, ModelActivity::class.java)
+                    modelIntent.data = uri
+                    (context as Activity).startActivity(modelIntent)
+                }
             }
         }, "app")
 
-        webview.webChromeClient = object : WebChromeClient() {
-            override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
-                android.util.Log.d("WebView", consoleMessage?.message().toString())
-                return true
-            }
-        }
-
-        webview.loadDataWithBaseURL("file:///android_asset/", html, "text/html; charset=utf-8", "UTF-8", null)
+        webView.loadDataWithBaseURL("file:///android_asset/", html, "text/html; charset=utf-8", "UTF-8", null)
     }
 
-    private fun getHTMLforModel(uri: Uri): String? {
+    /**
+     * handles the drawing result
+     */
+    fun handleDrawingResult() {
+        val image = BitmapFactory.decodeFile(DrawingActivity.getResultantImageFile(context, queryViewModel.currContainerID,
+                QueryTermType.MODEL3D).absolutePath)
+
+        val outputStream = ByteArrayOutputStream()
+        image.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+        val base64String = Base64.encodeToString(outputStream.toByteArray(), Base64.NO_WRAP)
+        queryViewModel.setDataOfQueryTerm(queryViewModel.currContainerID, QueryTermType.MODEL3D, base64String, 1)
+    }
+
+    /**
+     * This JavaScript interface is used to get result from three.js library
+     */
+    @Suppress("unused")
+    class WebViewJavaScriptInterface(private val processBase64JSONData: (String) -> Unit) {
+        @JavascriptInterface
+        fun processModelBase64JSONData(base64json: String) {
+            processBase64JSONData(base64json)
+        }
+    }
+
+    /**
+     * returns the HTML used for processing for the uri
+     */
+    private fun getHTMLForModel(uri: Uri): String? {
         val extension = File(uri.path).extension.toLowerCase()
         return when (extension) {
             "obj" -> getHTMLforOBJ(uri)
@@ -193,6 +224,9 @@ class Model3DQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewM
         }
     }
 
+    /**
+     * return the html used for processing for given uri pointing to valid stl file
+     */
     private fun getHTMLforSTL(uri: Uri) = """
                 <!DOCTYPE html>
                 <html>
@@ -214,6 +248,9 @@ class Model3DQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewM
                 </html>
                 """
 
+    /**
+     * returns the html used for processing for given uri pointing to valid obj file
+     */
     private fun getHTMLforOBJ(uri: Uri) = """
                 <!DOCTYPE html>
                 <html>
@@ -245,21 +282,4 @@ class Model3DQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewM
                   </body>
                 </html>
                 """
-
-    fun handleDrawingResult() {
-        val image = BitmapFactory.decodeFile(File((context as Activity).filesDir,
-                "imageQuery_image_${queryViewModel.currContainerID}_MODEL3D.png").absolutePath)
-
-        val outputStream = ByteArrayOutputStream()
-        image.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-        val base64String = Base64.encodeToString(outputStream.toByteArray(), Base64.NO_WRAP)
-        queryViewModel.setDataOfQueryTerm(queryViewModel.currContainerID, QueryTermType.MODEL3D, base64String, 1)
-    }
-
-    class WebViewJavaScriptInterface(val processBase64JSONData: (String) -> Unit) {
-        @JavascriptInterface
-        fun processModelBase64JSONData(base64json: String) {
-            processBase64JSONData(base64json)
-        }
-    }
 }

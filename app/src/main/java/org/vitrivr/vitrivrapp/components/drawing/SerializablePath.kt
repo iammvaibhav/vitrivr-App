@@ -3,6 +3,9 @@ package org.vitrivr.vitrivrapp.components.drawing
 import android.graphics.Path
 import java.util.*
 
+/**
+ * This class extends Path to add limited serialization capabilities to be used in MotionDrawingActivity
+ */
 class SerializablePath : Path() {
 
     var actions = ArrayList<Action>()

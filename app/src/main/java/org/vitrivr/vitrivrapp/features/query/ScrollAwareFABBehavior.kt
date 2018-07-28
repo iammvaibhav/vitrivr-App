@@ -7,12 +7,15 @@ import android.support.v4.view.ViewCompat
 import android.util.AttributeSet
 import android.view.View
 
+/**
+ * ScrollAwareFABBehavior is Behaviour for CoordinatorLayout. It movies the FAB off the screen while scrolling a NestedScrollingView
+ */
 class ScrollAwareFABBehavior() : FloatingActionButton.Behavior() {
 
     constructor(context: Context, attrs: AttributeSet): this()
 
     override fun onStartNestedScroll(coordinatorLayout: CoordinatorLayout,
-                            child: FloatingActionButton, directTargetChild: View, target: View, nestedScrollAxes: Int, type: Int): Boolean {
+                                     child: FloatingActionButton, directTargetChild: View, target: View, nestedScrollAxes: Int, type: Int): Boolean {
 
         return nestedScrollAxes == ViewCompat.SCROLL_AXIS_VERTICAL ||
                 super.onStartNestedScroll(coordinatorLayout, child, directTargetChild, target, nestedScrollAxes, type)

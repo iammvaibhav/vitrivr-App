@@ -10,6 +10,9 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import org.vitrivr.vitrivrapp.R
 
+/**
+ * This class extends AppCompatImageView to provide drawing capabilities on it.
+ */
 open class DrawableImageView @JvmOverloads constructor(context: Context,
                                                        attrs: AttributeSet? = null,
                                                        defStyleAttr: Int = 0,
@@ -182,12 +185,8 @@ open class DrawableImageView @JvmOverloads constructor(context: Context,
     /**
      * Returns true if any paths are currently drawn on the image, false otherwise.
      */
-    fun isModified(): Boolean {
-        return if (paths != null) {
-            paths.isNotEmpty()
-        } else {
-            false
-        }
+    private fun isModified(): Boolean {
+        return paths.isNotEmpty()
     }
 
     /**

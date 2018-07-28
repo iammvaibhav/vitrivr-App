@@ -1,6 +1,7 @@
 package org.vitrivr.vitrivrapp.components.drawing
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
@@ -14,48 +15,110 @@ import com.jaredrummler.android.colorpicker.ColorPickerDialogListener
 import com.jaredrummler.android.colorpicker.ColorShape
 import kotlinx.android.synthetic.main.drawing_activity.*
 import org.vitrivr.vitrivrapp.R
+import org.vitrivr.vitrivrapp.data.model.enums.QueryTermType
 import org.vitrivr.vitrivrapp.utils.px
+import org.vitrivr.vitrivrapp.utils.showToast
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 
+@Suppress("UNUSED_PARAMETER")
 class DrawingActivity : AppCompatActivity(), ColorPickerDialogListener {
 
-    private val DIALOG_ID = 1
-    private val SELECT_PHOTO = 1
+    companion object {
+        const val INTENT_EXTRA_CONTAINER_ID = "INTENT_EXTRA_CONTAINER_ID"
+        const val INTENT_EXTRA_TERM_TYPE = "INTENT_EXTRA_TERM_TYPE"
+        private const val DIALOG_ID = 1
+        private const val SELECT_PHOTO = 1
+        private const val TEMPORARY_IMAGE = "TEMPORARY_IMAGE"
+
+        fun getResultantImageFile(context: Context, containerID: Long, termType: QueryTermType): File {
+            return File(context.filesDir, "query_${containerID}_$termType.png")
+        }
+
+        fun getOriginalImageFile(context: Context, containerID: Long, termType: QueryTermType): File {
+            return File(context.filesDir, "query_${containerID}_${termType}_orig.png")
+        }
+    }
+
+    /**
+     * size in pixels of resultant image
+     */
     private val pixelWidth = 300
+
+    /**
+     * last chosen color
+     */
     private var lastColor = Color.parseColor("#555555")
+
     lateinit var drawingCanvas: DrawableImageView
     lateinit var brushWidth: SeekBar
+
+    /**
+     * container ID and term type which started this activity. This will be updated later in onCreate
+     */
+    private var containerID: Long = 0
+    private var termType: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.drawing_activity)
+
+        /**
+         * setup toolbar
+         */
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
-        //supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         drawingCanvas = findViewById(R.id.drawingCanvas)
         brushWidth = findViewById(R.id.brushWidth)
 
-        val containerID = intent.getLongExtra("containerID", 0)
-        val termType = intent.getStringExtra("termType")
-
-        val tempFile = File(filesDir, "imageQuery_tempImage.png")
-        val origFile = File(filesDir, "imageQuery_image_orig_${containerID}_$termType.png")
-        if (tempFile.exists()) {
-            val tempImage = BitmapFactory.decodeFile(tempFile.absolutePath)
-            drawingCanvas.setImageBitmap(tempImage)
-        } else if (origFile.exists()) {
-            val origImage = BitmapFactory.decodeFile(origFile.absolutePath)
-            drawingCanvas.setImageBitmap(origImage)
-        } else {
-            val bitmap = Bitmap.createBitmap(pixelWidth.px, pixelWidth.px, Bitmap.Config.ARGB_8888)
-            val canvas = Canvas(bitmap)
-            canvas.drawARGB(255, 255, 255, 255)
-            drawingCanvas.setImageBitmap(bitmap)
+        /**
+         * update containerID and termType
+         */
+        intent.getStringExtra(INTENT_EXTRA_TERM_TYPE)?.let {
+            termType = it
+            containerID = intent.getLongExtra(INTENT_EXTRA_CONTAINER_ID, 0)
         }
 
+        /**
+         * if termType or containerID is not found then set result to cancelled and
+         * finish this activity
+         */
+        if (termType == "" || containerID == 0L) {
+            setResult(Activity.RESULT_CANCELED)
+            finish()
+        }
+
+        /**
+         * temporary image used for restoring work while orientation changes
+         */
+        val tempFile = File(filesDir, TEMPORARY_IMAGE)
+        val origFile = getOriginalImageFile()
+
+        when {
+            tempFile.exists() -> {
+                val tempImage = BitmapFactory.decodeFile(tempFile.absolutePath)
+                drawingCanvas.setImageBitmap(tempImage)
+            }
+            origFile.exists() -> {
+                val origImage = BitmapFactory.decodeFile(origFile.absolutePath)
+                drawingCanvas.setImageBitmap(origImage)
+            }
+            else -> {
+                /**
+                 * create white bitmap of pixelWidth dp x pixelWidth dp and set to drawing canvas
+                 */
+                val bitmap = Bitmap.createBitmap(pixelWidth.px, pixelWidth.px, Bitmap.Config.ARGB_8888)
+                val canvas = Canvas(bitmap)
+                canvas.drawARGB(255, 255, 255, 255)
+                drawingCanvas.setImageBitmap(bitmap)
+            }
+        }
+
+        /**
+         * setup drawing tools
+         */
         drawingCanvas.strokeColor = lastColor
         brushWidth.progressDrawable.setColorFilter(lastColor, PorterDuff.Mode.MULTIPLY)
         brushWidth.thumb.setColorFilter(lastColor, PorterDuff.Mode.SRC_ATOP)
@@ -75,20 +138,26 @@ class DrawingActivity : AppCompatActivity(), ColorPickerDialogListener {
         })
     }
 
+    /**
+     * Invokes when user presses back button
+     * set the result of cancelled and finish the activity
+     */
+    fun back(view: View) {
+        setResult(Activity.RESULT_CANCELED)
+        finish()
+    }
+
+    /**
+     * Invoked when user presses save button
+     * creates resultant image by scaling original image and saves both of them
+     */
     fun save(view: View) {
         drawingCanvas.drawable?.let {
-            val containerID = intent.getLongExtra("containerID", 0)
-            val termType = intent.getStringExtra("termType")
-
             val scaledBitmap = Bitmap.createScaledBitmap((drawingCanvas.drawable as BitmapDrawable).bitmap, pixelWidth, pixelWidth, false)
             val origBitmap = (drawingCanvas.drawable as BitmapDrawable).bitmap
 
-            val dir = filesDir
-            val file = File(dir, "imageQuery_image_${containerID}_$termType.png")
-            val origFile = File(dir, "imageQuery_image_orig_${containerID}_$termType.png")
-
-            val stream = FileOutputStream(file)
-            val origStream = FileOutputStream(origFile)
+            val stream = FileOutputStream(getResultantImageFile())
+            val origStream = FileOutputStream(getOriginalImageFile())
 
             scaledBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
             origBitmap.compress(Bitmap.CompressFormat.PNG, 100, origStream)
@@ -104,12 +173,20 @@ class DrawingActivity : AppCompatActivity(), ColorPickerDialogListener {
         }
     }
 
+    /**
+     * Invokes when user presses load button
+     * starts activity for selecting photos
+     */
     fun load(view: View) {
         val photoPickerIntent = Intent(Intent.ACTION_PICK)
         photoPickerIntent.type = "image/*"
         startActivityForResult(photoPickerIntent, SELECT_PHOTO)
     }
 
+    /**
+     * Invokes when user presses clear button
+     * clears the drawing canvas
+     */
     fun clear(view: View) {
         drawingCanvas.clear()
         val bitmap = Bitmap.createBitmap(pixelWidth.px, pixelWidth.px, Bitmap.Config.ARGB_8888)
@@ -119,10 +196,18 @@ class DrawingActivity : AppCompatActivity(), ColorPickerDialogListener {
 
     }
 
+    /**
+     * Invokes when user presses undo button
+     * Undo the last action on drawing canvas
+     */
     fun undo(view: View) {
         drawingCanvas.undo()
     }
 
+    /**
+     * Invokes when user presses fill button
+     * Fill the entire canvas with a solid known last color
+     */
     fun fill(view: View) {
         drawingCanvas.clear()
         val bitmap = Bitmap.createBitmap(pixelWidth.px, pixelWidth.px, Bitmap.Config.ARGB_8888)
@@ -131,6 +216,10 @@ class DrawingActivity : AppCompatActivity(), ColorPickerDialogListener {
         drawingCanvas.setImageBitmap(bitmap)
     }
 
+    /**
+     * Invokes when user presses select color button
+     * shows a color picker dialog for selecting color
+     */
     fun selectColor(view: View) {
         ColorPickerDialog.newBuilder()
                 .setDialogType(ColorPickerDialog.TYPE_PRESETS)
@@ -144,13 +233,13 @@ class DrawingActivity : AppCompatActivity(), ColorPickerDialogListener {
                 .show(this)
     }
 
-    fun back(view: View) {
-        setResult(Activity.RESULT_CANCELED)
-        finish()
+    override fun onDialogDismissed(dialogId: Int) {
+        /* Do nothing */
     }
 
-    override fun onDialogDismissed(dialogId: Int) {}
-
+    /**
+     * Invokes when user selects a color from ColorPickerDialog
+     */
     override fun onColorSelected(dialogId: Int, color: Int) {
         if (dialogId == DIALOG_ID) {
             colorPanel.color = color
@@ -161,13 +250,20 @@ class DrawingActivity : AppCompatActivity(), ColorPickerDialogListener {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == SELECT_PHOTO && resultCode == RESULT_OK) {
-            val selectedImage = data?.data
-            selectedImage?.let {
-                val bitmap = decodeUri(it)
-                bitmap?.let {
-                    drawingCanvas.clear()
-                    drawingCanvas.setImageBitmap(it)
+
+        when (requestCode) {
+            SELECT_PHOTO -> {
+                if (resultCode == Activity.RESULT_OK && data != null) {
+                    val selectedImage = data.data
+                    selectedImage?.let {
+                        val bitmap = decodeUri(it)
+                        bitmap?.let {
+                            drawingCanvas.clear()
+                            drawingCanvas.setImageBitmap(it)
+                        }
+                    }
+                } else {
+                    "Selection Cancelled".showToast(this)
                 }
             }
         }
@@ -176,8 +272,11 @@ class DrawingActivity : AppCompatActivity(), ColorPickerDialogListener {
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
 
+        /**
+         * saves the drawn image for restoring it back
+         */
         val tempBitmap = (drawingCanvas.drawable as BitmapDrawable).bitmap
-        val tempStream = FileOutputStream(File(filesDir, "imageQuery_tempImage.png"))
+        val tempStream = FileOutputStream(File(filesDir, TEMPORARY_IMAGE))
         tempBitmap.compress(Bitmap.CompressFormat.PNG, 100, tempStream)
         tempStream.flush()
         tempStream.close()
@@ -186,14 +285,36 @@ class DrawingActivity : AppCompatActivity(), ColorPickerDialogListener {
     override fun onStop() {
         super.onStop()
 
+        /**
+         * if activity is gonna finish, delete the temporary image if exists
+         */
         if (isFinishing) {
-            val tempFile = File(filesDir, "imageQuery_tempImage.png")
+            val tempFile = File(filesDir, TEMPORARY_IMAGE)
             if (tempFile.exists())
                 tempFile.delete()
         }
     }
 
+    /**
+     * @returns original image File object
+     */
+    private fun getOriginalImageFile(): File {
+        return File(filesDir, "query_${containerID}_${termType}_orig.png")
+    }
+
+    /**
+     * @returns resultant image File object
+     */
+    private fun getResultantImageFile(): File {
+        return File(filesDir, "query_${containerID}_$termType.png")
+    }
+
     @Throws(FileNotFoundException::class)
+    /**
+     * Decodes the Uri and returns a Bitmap object if decoding is successful
+     * @param selectedImage Uri of image to be decoded
+     * @returns Bitmap object if decoding is successful else null
+     */
     private fun decodeUri(selectedImage: Uri): Bitmap? {
 
         // Decode image size
@@ -202,18 +323,18 @@ class DrawingActivity : AppCompatActivity(), ColorPickerDialogListener {
         BitmapFactory.decodeStream(contentResolver.openInputStream(selectedImage), null, o)
 
         // The new size we want to scale to
-        val REQUIRED_SIZE = (pixelWidth / 2).px
+        val requiredSize = (pixelWidth / 2).px
 
         // Find the correct scale value. It should be the power of 2.
-        var width_tmp = o.outWidth
-        var height_tmp = o.outHeight
+        var widthTmp = o.outWidth
+        var heightTmp = o.outHeight
         var scale = 1
         while (true) {
-            if (width_tmp / 2 < REQUIRED_SIZE || height_tmp / 2 < REQUIRED_SIZE) {
+            if (widthTmp / 2 < requiredSize || heightTmp / 2 < requiredSize) {
                 break
             }
-            width_tmp /= 2
-            height_tmp /= 2
+            widthTmp /= 2
+            heightTmp /= 2
             scale *= 2
         }
 

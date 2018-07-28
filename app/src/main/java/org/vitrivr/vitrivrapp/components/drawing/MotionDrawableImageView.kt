@@ -205,11 +205,12 @@ open class MotionDrawableImageView @JvmOverloads constructor(context: Context,
      * Returns true if any paths are currently drawn on the image, false otherwise.
      */
     private fun isModified(): Boolean {
-        return if (paths != null) {
+        /*return if (paths != null) {
             paths.isNotEmpty()
         } else {
             false
-        }
+        }*/
+        return paths.isNotEmpty()
     }
 
     /**
@@ -221,6 +222,10 @@ open class MotionDrawableImageView @JvmOverloads constructor(context: Context,
         invalidate()
     }
 
+    /**
+     * used to select drawing motion for background for foreground
+     * @param desc MotionDescription describing if motion drawing is for background or foreground
+     */
     fun selectMotion(desc: MotionDrawableImageView.Companion.MotionDescription) {
         strokeColor = when (desc) {
             MotionDrawableImageView.Companion.MotionDescription.BACKGROUND -> Color.GREEN

@@ -7,4 +7,17 @@
     <string name="save_button_text">Save</string>
     <string name="select_folder_text">Select Folder</string>
     <string name="query_description_hint">Query Description</string>
+    <string name="query_image">Image Query</string>
+    <string name="query_audio">Audio Query</string>
+    <string name="query_model3d">3D Query</string>
+    <string name="query_motion">Motion Query</string>
+    <string name="query_text">Text Query</string>
+    <string name="query_location">Location Query</string>
+    <string name="audio_duration_00">0:00</string>
+    <string name="no_audio_available">No Audio Available</string>
+    <string name="audio_recorded">Audio Recorded</string>
+    <string name="audio_loaded">Audio Loaded</string>
+    <string name="processing_audio">Processing Audio</string>
+    <string name="model_loaded">Model Loaded. Tap to view</string>
+    <string name="loading_model">Loading Model...</string>
 </resources>

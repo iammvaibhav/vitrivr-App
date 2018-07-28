@@ -14,9 +14,11 @@ import org.vitrivr.vitrivrapp.components.drawing.MotionDrawingActivity
 import org.vitrivr.vitrivrapp.data.model.enums.QueryTermType
 import org.vitrivr.vitrivrapp.features.query.MOTION_DRAW_RESULT
 import org.vitrivr.vitrivrapp.features.query.QueryViewModel
-import java.io.File
 
-class MotionQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewModel,
+/**
+ * Tools for constructing a motion query
+ */
+class MotionQueryTools @JvmOverloads constructor(private val queryViewModel: QueryViewModel,
                                                  wasChecked: Boolean,
                                                  toolsContainer: ViewGroup,
                                                  context: Context,
@@ -27,14 +29,17 @@ class MotionQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewMo
     val imagePreview: ImageView
 
     init {
-        // inflate the image_query_tools layout to this view
+        /**
+         * inflate the image_query_tools layout to this view
+         */
+
         LayoutInflater.from(context).inflate(R.layout.motion_query_tools, toolsContainer, true)
 
         imagePreview = toolsContainer.findViewById(R.id.imagePreview)
 
         imagePreview.setOnClickListener {
             val intent = Intent(context, MotionDrawingActivity::class.java)
-            intent.putExtra("containerID", queryViewModel.currContainerID)
+            intent.putExtra(MotionDrawingActivity.INTENT_EXTRA_CONTAINER_ID, queryViewModel.currContainerID)
             (context as Activity).startActivityForResult(intent, MOTION_DRAW_RESULT)
         }
 
@@ -46,8 +51,7 @@ class MotionQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewMo
     }
 
     private fun restoreState() {
-        val image = BitmapFactory.decodeFile(File((context as Activity).filesDir,
-                "MOTION_QUERY_KEY_${queryViewModel.currContainerID}.png").absolutePath)
+        val image = BitmapFactory.decodeFile(MotionDrawingActivity.getResultantMotionImageFile(context, queryViewModel.currContainerID).absolutePath)
         imagePreview.setImageBitmap(image)
     }
 

@@ -1,13 +1,12 @@
 package org.vitrivr.vitrivrapp.features.query.tools
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.content.pm.PackageManager
 import android.graphics.Color
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
-import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.util.AttributeSet
 import android.util.Base64
@@ -17,7 +16,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
-import android.widget.Toast
 import cafe.adriel.androidaudiorecorder.AndroidAudioRecorder
 import cafe.adriel.androidaudiorecorder.model.AudioChannel
 import cafe.adriel.androidaudiorecorder.model.AudioSampleRate
@@ -28,15 +26,20 @@ import nl.bravobit.ffmpeg.FFmpeg
 import org.vitrivr.vitrivrapp.R
 import org.vitrivr.vitrivrapp.data.model.enums.QueryTermType
 import org.vitrivr.vitrivrapp.features.query.*
+import org.vitrivr.vitrivrapp.utils.checkAndRequestPermission
+import org.vitrivr.vitrivrapp.utils.showToast
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
 
+@SuppressLint("ViewConstructor")
+/**
+ * Tools for constructing an audio query
+ */
 class AudioQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewModel,
                                                 wasChecked: Boolean,
                                                 toolsContainer: ViewGroup,
                                                 context: Context,
-                                                val openTerm: () -> Unit,
                                                 attrs: AttributeSet? = null,
                                                 defStyleAttr: Int = 0,
                                                 defStyleRes: Int = 0) : View(context, attrs, defStyleAttr, defStyleRes) {
@@ -49,12 +52,17 @@ class AudioQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewMod
     val audioDuration: TextView
     val fingerprintHummingBalance: SeekBar
 
-    var mediaPlayer: MediaPlayer? = null
+    private var mediaPlayer: MediaPlayer? = null
 
     init {
-        // inflate the audio_query_tools layout to this view
+        /**
+         * inflate the audio_query_tools layout to this view
+         */
         LayoutInflater.from(context).inflate(R.layout.audio_query_tools, toolsContainer, true)
 
+        /**
+         * initializing views
+         */
         recordAudio = toolsContainer.findViewById(R.id.recordAudio)
         removeAudio = toolsContainer.findViewById(R.id.removeAudio)
         loadAudio = toolsContainer.findViewById(R.id.loadAudio)
@@ -64,18 +72,19 @@ class AudioQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewMod
         fingerprintHummingBalance = toolsContainer.findViewById(R.id.fingerprintHummingBalance)
 
         recordAudio.setOnClickListener {
+            removeAudio.performClick()
             recordAudio.setColorFilter(Color.RED)
 
-            if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(context as Activity, arrayOf(android.Manifest.permission.RECORD_AUDIO), RECORD_REQUEST_CODE)
-            } else {
+            (context as Activity).checkAndRequestPermission(android.Manifest.permission.RECORD_AUDIO, RECORD_REQUEST_CODE) {
                 startRecordingAudio()
             }
         }
 
         removeAudio.setOnClickListener {
-            val recordedAudioFile = File(context.filesDir, "audioQuery_recorded_audio_${queryViewModel.currContainerID}.wav")
-            val loadedAudioFile = File((context as Activity).filesDir, "audioQuery_loaded_audio_${queryViewModel.currContainerID}.wav")
+            stopPlayback()
+
+            val recordedAudioFile = getRecordedAudioFile()
+            val loadedAudioFile = getLoadedAudioFile()
 
             if (recordedAudioFile.exists())
                 recordedAudioFile.delete()
@@ -85,16 +94,15 @@ class AudioQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewMod
 
             recordAudio.setColorFilter(ContextCompat.getColor(context, R.color.tileIconSelected))
             loadAudio.setColorFilter(ContextCompat.getColor(context, R.color.tileIconSelected))
-            audioDuration.text = "0:00"
-            audioName.text = "No Audio Available"
+            audioDuration.text = context.getString(R.string.audio_duration_00)
+            audioName.text = context.getString(R.string.no_audio_available)
         }
 
         loadAudio.setOnClickListener {
+            removeAudio.performClick()
             loadAudio.setColorFilter(Color.RED)
 
-            if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(context as Activity, arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), LOAD_AUDIO_REQUEST_CODE)
-            } else {
+            (context as Activity).checkAndRequestPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE, LOAD_AUDIO_REQUEST_CODE) {
                 startPickingFile()
             }
         }
@@ -102,8 +110,8 @@ class AudioQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewMod
         playAudio.setOnClickListener {
             when (playAudio.tag) {
                 "play" -> {
-                    val recordedAudioFile = File(context.filesDir, "audioQuery_recorded_audio_${queryViewModel.currContainerID}.wav")
-                    val loadedAudioFile = File((context as Activity).filesDir, "audioQuery_loaded_audio_${queryViewModel.currContainerID}.wav")
+                    val recordedAudioFile = getRecordedAudioFile()
+                    val loadedAudioFile = getLoadedAudioFile()
 
                     val audioFile = when {
                         recordedAudioFile.exists() -> recordedAudioFile
@@ -114,6 +122,7 @@ class AudioQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewMod
                     if (audioFile != null) {
                         if (mediaPlayer == null)
                             mediaPlayer = MediaPlayer.create(context, Uri.fromFile(audioFile))
+
                         mediaPlayer?.start()
                         mediaPlayer?.setOnCompletionListener {
                             playAudio.setImageResource(R.drawable.icon_play_audio)
@@ -142,15 +151,24 @@ class AudioQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewMod
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
+        /**
+         * If it was checked before, implies previous state exists, then restore it
+         */
         if (wasChecked) {
             restoreState()
         } else {
+            /**
+             * else add a new AUDIO query term to query container model
+             */
             queryViewModel.addQueryTermToContainer(queryViewModel.currContainerID, QueryTermType.AUDIO)
         }
     }
 
+    /**
+     * start recording audio activity
+     */
     fun startRecordingAudio() {
-        val filePath = File((context as Activity).filesDir, "audioQuery_recorded_audio_${queryViewModel.currContainerID}_unformatted.wav").absolutePath
+        val filePath = getUnformattedRecordedAudioFile().absolutePath
         val color = ContextCompat.getColor(context, R.color.colorPrimaryDark)
 
         AndroidAudioRecorder.with(context as Activity)
@@ -165,6 +183,9 @@ class AudioQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewMod
                 .record()
     }
 
+    /**
+     * start picking file activity
+     */
     fun startPickingFile() {
         FilePickerBuilder.getInstance()
                 .setMaxCount(1)
@@ -173,30 +194,152 @@ class AudioQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewMod
                 .pickFile(context as Activity, LOAD_AUDIO_RESULT)
     }
 
+    /**
+     * handle recorded audio result. Use FFmpeg to change sampling rate to 22050Hz and the channel to mono
+     */
+    fun handleRecordedAudioResult() {
+        loadAudio.setColorFilter(ContextCompat.getColor(context, R.color.tileIconSelected))
+        recordAudio.setColorFilter(Color.RED)
+
+        val loadedAudio = getLoadedAudioFile()
+        if (loadedAudio.exists()) loadedAudio.delete()
+
+        val unformattedAudioFile = getUnformattedRecordedAudioFile()
+        val audioFile = getRecordedAudioFile()
+
+        if (FFmpeg.getInstance(context).isSupported) {
+            FFmpeg.getInstance(context).execute(arrayOf("-i", unformattedAudioFile.absolutePath, "-ar", "22050", "-map_channel", "0.0.0", audioFile.absolutePath), object : FFcommandExecuteResponseHandler {
+
+                override fun onStart() {
+                    audioName.text = context.getString(R.string.processing_audio)
+                }
+
+                override fun onSuccess(message: String?) {
+                    audioName.text = context.getString(R.string.audio_recorded)
+                    setDurationFromFile(audioFile.absolutePath)
+                    unformattedAudioFile.delete()
+
+                    /**
+                     * get base64 string from audioFile
+                     */
+                    val fileStream = FileInputStream(audioFile)
+                    val byteArrayOutputStream = ByteArrayOutputStream()
+                    val byteArray = ByteArray(1024)
+                    var x = fileStream.read(byteArray)
+                    while (x != -1) {
+                        byteArrayOutputStream.write(byteArray, 0, x)
+                        x = fileStream.read(byteArray)
+                    }
+
+                    val base64String = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.NO_WRAP)
+                    queryViewModel.setDataOfQueryTerm(queryViewModel.currContainerID, QueryTermType.AUDIO, base64String)
+                }
+
+                override fun onFailure(message: String?) {
+                    "Failed".showToast(context)
+                }
+
+                override fun onFinish() {}
+                override fun onProgress(message: String?) {}
+            })
+        } else {
+            "FFmpeg not supported".showToast(context)
+            recordAudio.setColorFilter(ContextCompat.getColor(context, R.color.tileIconSelected))
+        }
+    }
+
+    /**
+     * handle loaded audio result. Use FFmpeg to change sampling rate to 22050Hz and the channel to mono
+     * @param filePath file path of the selected audio file
+     */
+    fun handleLoadedAudioResult(filePath: String) {
+        recordAudio.setColorFilter(ContextCompat.getColor(context, R.color.tileIconSelected))
+        loadAudio.setColorFilter(Color.RED)
+
+        val recordedAudio = getRecordedAudioFile()
+        if (recordedAudio.exists()) recordedAudio.delete()
+
+        val loadedAudioFile = getLoadedAudioFile()
+
+        if (FFmpeg.getInstance(context).isSupported) {
+            FFmpeg.getInstance(context).execute(arrayOf("-i", filePath, "-ar", "22050", "-map_channel", "0.0.0", loadedAudioFile.absolutePath), object : FFcommandExecuteResponseHandler {
+
+                override fun onStart() {
+                    audioName.text = context.getText(R.string.processing_audio)
+                }
+
+                override fun onSuccess(message: String?) {
+                    audioName.text = context.getText(R.string.audio_loaded)
+                    setDurationFromFile(loadedAudioFile.absolutePath)
+
+                    /**
+                     * get base64 string from loaded audio file
+                     */
+                    val fileStream = FileInputStream(loadedAudioFile)
+                    val byteArrayOutputStream = ByteArrayOutputStream()
+                    val byteArray = ByteArray(1024)
+                    var x = fileStream.read(byteArray)
+                    while (x != -1) {
+                        byteArrayOutputStream.write(byteArray, 0, x)
+                        x = fileStream.read(byteArray)
+                    }
+                    val base64String = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.NO_WRAP)
+                    queryViewModel.setDataOfQueryTerm(queryViewModel.currContainerID, QueryTermType.AUDIO, base64String)
+                }
+
+                override fun onFailure(message: String?) {
+                    "Failed".showToast(context)
+                }
+
+                override fun onFinish() {}
+                override fun onProgress(message: String?) {}
+            })
+        } else {
+            "FFmpeg not supported".showToast(context)
+            loadAudio.setColorFilter(ContextCompat.getColor(context, R.color.tileIconSelected))
+        }
+    }
+
+    /**
+     * stop media playback
+     */
+    fun stopPlayback() {
+        if (mediaPlayer?.isPlaying == true) {
+            mediaPlayer?.stop()
+            mediaPlayer = null
+            playAudio.setImageResource(R.drawable.icon_play_audio)
+            playAudio.tag = "play"
+        }
+    }
+
     private fun restoreState() {
         // restore state
         fingerprintHummingBalance.progress = queryViewModel.getBalance(queryViewModel.currContainerID, QueryTermType.AUDIO)
 
-        val recordedAudioFile = File((context as Activity).filesDir, "audioQuery_recorded_audio_${queryViewModel.currContainerID}.wav")
-        val loadedAudioFile = File((context as Activity).filesDir, "audioQuery_loaded_audio_${queryViewModel.currContainerID}.wav")
+        val recordedAudioFile = getRecordedAudioFile()
+        val loadedAudioFile = getLoadedAudioFile()
 
         if (recordedAudioFile.exists()) {
             recordAudio.setColorFilter(Color.RED)
-            audioName.text = "Audio Recorded"
+            audioName.text = context.getString(R.string.audio_recorded)
             setDurationFromFile(recordedAudioFile.absolutePath)
-        } else {
+        } /*else {
             recordAudio.setColorFilter(ContextCompat.getColor((context as Activity), R.color.tileIconSelected))
-        }
+        }*/
 
         if (loadedAudioFile.exists()) {
             loadAudio.setColorFilter(Color.RED)
-            audioName.text = "Audio Loaded"
+            audioName.text = context.getString(R.string.audio_loaded)
             setDurationFromFile(loadedAudioFile.absolutePath)
-        } else {
+        } /*else {
             loadAudio.setColorFilter(ContextCompat.getColor(context as Activity, R.color.tileIconSelected))
-        }
+        }*/
     }
 
+    /**
+     * given file path of an audio file, set the audio duration to audioDuration TextView
+     * @param filePath absolute file path of the audio file
+     */
     private fun setDurationFromFile(filePath: String) {
         val mmr = MediaMetadataRetriever()
         mmr.setDataSource(filePath)
@@ -208,106 +351,16 @@ class AudioQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewMod
         audioDuration.text = duration
     }
 
-    fun handleRecordedAudioResult() {
-        loadAudio.setColorFilter(ContextCompat.getColor(context as Activity, R.color.tileIconSelected))
-        val loadedAudio = File((context as Activity).filesDir, "audioQuery_loaded_audio_${queryViewModel.currContainerID}.wav")
-        if (loadedAudio.exists()) loadedAudio.delete()
-
-        val unformattedAudioFile = File((context as Activity).filesDir, "audioQuery_recorded_audio_${queryViewModel.currContainerID}_unformatted.wav")
-        val audioFile = File((context as Activity).filesDir, "audioQuery_recorded_audio_${queryViewModel.currContainerID}.wav")
-
-        if (FFmpeg.getInstance(context).isSupported) {
-            FFmpeg.getInstance(context).execute(arrayOf("-i", unformattedAudioFile.absolutePath, "-ar", "22050", "-map_channel", "0.0.0", audioFile.absolutePath), object : FFcommandExecuteResponseHandler {
-
-                override fun onFinish() {
-
-                }
-
-                override fun onSuccess(message: String?) {
-                    unformattedAudioFile.delete()
-
-                    val fileStream = FileInputStream(audioFile)
-                    val byteArrayOutputStream = ByteArrayOutputStream()
-                    val byteArray = ByteArray(1024)
-                    var x = fileStream.read(byteArray)
-                    while (x != -1) {
-                        byteArrayOutputStream.write(byteArray, 0, x)
-                        x = fileStream.read(byteArray)
-                    }
-                    val base64String = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.NO_WRAP)
-                    queryViewModel.setDataOfQueryTerm(queryViewModel.currContainerID, QueryTermType.AUDIO, base64String)
-                    openTerm()
-                }
-
-                override fun onFailure(message: String?) {
-
-                }
-
-                override fun onProgress(message: String?) {
-
-                }
-
-                override fun onStart() {
-
-                }
-            })
-        } else {
-            Toast.makeText(context, "FFmpeg not supported", Toast.LENGTH_SHORT).show()
-        }
+    private fun getUnformattedRecordedAudioFile(): File {
+        return File(context.filesDir, "audioQuery_${queryViewModel.currContainerID}_recorded_audio_unformatted.wav")
     }
 
-    fun handleLoadedAudioResult(filePath: String) {
-        val loadedAudioFile = File((context as Activity).filesDir, "audioQuery_loaded_audio_${queryViewModel.currContainerID}.wav")
-
-        if (FFmpeg.getInstance(context).isSupported) {
-            FFmpeg.getInstance(context).execute(arrayOf("-i", filePath, "-ar", "22050", "-map_channel", "0.0.0", loadedAudioFile.absolutePath), object : FFcommandExecuteResponseHandler {
-                override fun onFinish() {
-
-                }
-
-                override fun onSuccess(message: String?) {
-                    recordAudio.setColorFilter(ContextCompat.getColor(context, R.color.tileIconSelected))
-                    val recordedAudio = File((context as Activity).filesDir, "audioQuery_recorded_audio_${queryViewModel.currContainerID}.wav")
-                    if (recordedAudio.exists()) recordedAudio.delete()
-
-                    val fileStream = FileInputStream(loadedAudioFile)
-                    val byteArrayOutputStream = ByteArrayOutputStream()
-                    val byteArray = ByteArray(1024)
-                    var x = fileStream.read(byteArray)
-                    while (x != -1) {
-                        byteArrayOutputStream.write(byteArray, 0, x)
-                        x = fileStream.read(byteArray)
-                    }
-                    val base64String = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.NO_WRAP)
-
-                    queryViewModel.setDataOfQueryTerm(queryViewModel.currContainerID, QueryTermType.AUDIO, base64String)
-                    openTerm()
-                }
-
-                override fun onFailure(message: String?) {
-
-                }
-
-                override fun onProgress(message: String?) {
-
-                }
-
-                override fun onStart() {
-
-                }
-            })
-        } else {
-            Toast.makeText(context, "FFmpeg not supported", Toast.LENGTH_SHORT).show()
-        }
+    private fun getRecordedAudioFile(): File {
+        return File(context.filesDir, "audioQuery_${queryViewModel.currContainerID}_recorded_audio.wav")
     }
 
-    fun stopPlayback() {
-        if (mediaPlayer?.isPlaying == true) {
-            mediaPlayer?.stop()
-            mediaPlayer = null
-            playAudio.setImageResource(R.drawable.icon_play_audio)
-            playAudio.tag = "play"
-        }
+    private fun getLoadedAudioFile(): File {
+        return File(context.filesDir, "audioQuery_${queryViewModel.currContainerID}_loaded_audio.wav")
     }
 
 }
