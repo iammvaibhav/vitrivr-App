@@ -18,6 +18,8 @@ import droidninja.filepicker.FilePickerConst
 import kotlinx.android.synthetic.main.query_activity.*
 import kotlinx.android.synthetic.main.query_detail_bottom_sheet.*
 import org.vitrivr.vitrivrapp.R
+import org.vitrivr.vitrivrapp.components.drawing.DrawingActivity
+import org.vitrivr.vitrivrapp.components.drawing.MotionDrawingActivity
 import org.vitrivr.vitrivrapp.data.model.enums.MessageType
 import org.vitrivr.vitrivrapp.data.model.enums.QueryTermType
 import org.vitrivr.vitrivrapp.data.model.query.QueryContainerModel
@@ -403,8 +405,8 @@ class QueryActivity : AppCompatActivity() {
                 /**
                  * removes the preview and original query image if exist
                  */
-                val preview = File(filesDir, "imageQuery_image_${containerID}_IMAGE.png")
-                val orig = File(filesDir, "imageQuery_image_orig_${containerID}_IMAGE.png")
+                val preview = DrawingActivity.getResultantImageFile(this, containerID, type)
+                val orig = DrawingActivity.getOriginalImageFile(this, containerID, type)
                 if (preview.exists()) preview.delete()
                 if (orig.exists()) orig.delete()
             }
@@ -412,8 +414,8 @@ class QueryActivity : AppCompatActivity() {
                 /**
                  * removes the loaded or recorded audio files
                  */
-                val audioFile = File(filesDir, "audioQuery_recorded_audio_$containerID.wav")
-                val loadedAudioFile = File(filesDir, "audioQuery_loaded_audio_$containerID.wav")
+                val audioFile = File(filesDir, "audioQuery_${containerID}_recorded_audio.wav")
+                val loadedAudioFile = File(filesDir, "audioQuery_${containerID}_loaded_audio.wav")
                 if (audioFile.exists()) audioFile.delete()
                 if (loadedAudioFile.exists()) loadedAudioFile.delete()
             }
@@ -421,8 +423,8 @@ class QueryActivity : AppCompatActivity() {
                 /**
                  * removes the preview and original model query image if exist
                  */
-                val preview = File(filesDir, "imageQuery_image_${containerID}_MODEL3D.png")
-                val orig = File(filesDir, "imageQuery_image_orig_${containerID}_MODEL3D.png")
+                val preview = DrawingActivity.getResultantImageFile(this, containerID, type)
+                val orig = DrawingActivity.getOriginalImageFile(this, containerID, type)
                 if (preview.exists()) preview.delete()
                 if (orig.exists()) orig.delete()
             }
@@ -430,7 +432,7 @@ class QueryActivity : AppCompatActivity() {
                 /**
                  * removes the preview motion image and motion data if exist
                  */
-                val preview = File(filesDir, "MOTION_QUERY_KEY_$containerID.png")
+                val preview = MotionDrawingActivity.getResultantMotionImageFile(this, containerID)
                 if (preview.exists()) preview.delete()
                 queryViewModel.removeMotionData(containerID)
             }

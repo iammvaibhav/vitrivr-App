@@ -215,24 +215,26 @@ class AudioQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewMod
                 }
 
                 override fun onSuccess(message: String?) {
-                    audioName.text = context.getString(R.string.audio_recorded)
-                    setDurationFromFile(audioFile.absolutePath)
-                    unformattedAudioFile.delete()
+                    if (audioFile.exists()) {
+                        audioName.text = context.getString(R.string.audio_recorded)
+                        setDurationFromFile(audioFile.absolutePath)
+                        unformattedAudioFile.delete()
 
-                    /**
-                     * get base64 string from audioFile
-                     */
-                    val fileStream = FileInputStream(audioFile)
-                    val byteArrayOutputStream = ByteArrayOutputStream()
-                    val byteArray = ByteArray(1024)
-                    var x = fileStream.read(byteArray)
-                    while (x != -1) {
-                        byteArrayOutputStream.write(byteArray, 0, x)
-                        x = fileStream.read(byteArray)
+                        /**
+                         * get base64 string from audioFile
+                         */
+                        val fileStream = FileInputStream(audioFile)
+                        val byteArrayOutputStream = ByteArrayOutputStream()
+                        val byteArray = ByteArray(1024)
+                        var x = fileStream.read(byteArray)
+                        while (x != -1) {
+                            byteArrayOutputStream.write(byteArray, 0, x)
+                            x = fileStream.read(byteArray)
+                        }
+
+                        val base64String = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.NO_WRAP)
+                        queryViewModel.setDataOfQueryTerm(queryViewModel.currContainerID, QueryTermType.AUDIO, base64String)
                     }
-
-                    val base64String = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.NO_WRAP)
-                    queryViewModel.setDataOfQueryTerm(queryViewModel.currContainerID, QueryTermType.AUDIO, base64String)
                 }
 
                 override fun onFailure(message: String?) {
@@ -269,22 +271,24 @@ class AudioQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewMod
                 }
 
                 override fun onSuccess(message: String?) {
-                    audioName.text = context.getText(R.string.audio_loaded)
-                    setDurationFromFile(loadedAudioFile.absolutePath)
+                    if (loadedAudioFile.exists()) {
+                        audioName.text = context.getText(R.string.audio_loaded)
+                        setDurationFromFile(loadedAudioFile.absolutePath)
 
-                    /**
-                     * get base64 string from loaded audio file
-                     */
-                    val fileStream = FileInputStream(loadedAudioFile)
-                    val byteArrayOutputStream = ByteArrayOutputStream()
-                    val byteArray = ByteArray(1024)
-                    var x = fileStream.read(byteArray)
-                    while (x != -1) {
-                        byteArrayOutputStream.write(byteArray, 0, x)
-                        x = fileStream.read(byteArray)
+                        /**
+                         * get base64 string from loaded audio file
+                         */
+                        val fileStream = FileInputStream(loadedAudioFile)
+                        val byteArrayOutputStream = ByteArrayOutputStream()
+                        val byteArray = ByteArray(1024)
+                        var x = fileStream.read(byteArray)
+                        while (x != -1) {
+                            byteArrayOutputStream.write(byteArray, 0, x)
+                            x = fileStream.read(byteArray)
+                        }
+                        val base64String = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.NO_WRAP)
+                        queryViewModel.setDataOfQueryTerm(queryViewModel.currContainerID, QueryTermType.AUDIO, base64String)
                     }
-                    val base64String = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.NO_WRAP)
-                    queryViewModel.setDataOfQueryTerm(queryViewModel.currContainerID, QueryTermType.AUDIO, base64String)
                 }
 
                 override fun onFailure(message: String?) {
@@ -341,6 +345,8 @@ class AudioQueryTools @JvmOverloads constructor(val queryViewModel: QueryViewMod
      * @param filePath absolute file path of the audio file
      */
     private fun setDurationFromFile(filePath: String) {
+        if (!File(filePath).exists()) return
+
         val mmr = MediaMetadataRetriever()
         mmr.setDataSource(filePath)
         val durationStr = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
