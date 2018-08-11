@@ -40,7 +40,6 @@ class VideoResultDetailActivity : AppCompatActivity() {
 
     @Inject
     lateinit var pathUtils: PathUtils
-    val WRITE_REQUEST_CODE = 1
 
     lateinit var presenterObject: QueryResultPresenterModel
     lateinit var categoryInfo: HashMap<MediaType, HashSet<String>>

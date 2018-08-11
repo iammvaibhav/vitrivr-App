@@ -15,7 +15,9 @@ import org.vitrivr.vitrivrapp.components.results.EqualSpacingItemDecoration
 import org.vitrivr.vitrivrapp.data.model.addmedia.ExtractionMetadata
 import org.vitrivr.vitrivrapp.utils.px
 
-
+/**
+ * Dialog for editing metadata
+ */
 class MetadataEditorDialog(context: Context, val fileName: String, val metadata: ArrayList<ExtractionMetadata>) : Dialog(context) {
 
     override fun onCreate(savedInstanceState: Bundle?) {

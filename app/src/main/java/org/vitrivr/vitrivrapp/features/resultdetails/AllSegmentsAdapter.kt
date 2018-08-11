@@ -19,11 +19,14 @@ import org.vitrivr.vitrivrapp.features.results.ResultsActivity.Companion.QUERY_T
 import org.vitrivr.vitrivrapp.utils.PathUtils
 import javax.inject.Inject
 
-class AllSegmentsAdapter(val allSegments: List<SegmentDetails>,
-                         val objectId: String,
+/**
+ * Recycler View adapter for showing all segments
+ */
+class AllSegmentsAdapter(private val allSegments: List<SegmentDetails>,
+                         private val objectId: String,
                          val mediaType: MediaType,
-                         val categoryInfo: HashMap<MediaType, HashSet<String>>,
-                         val segmentClickListener: ((Double) -> Unit)? = null) : RecyclerView.Adapter<AllSegmentsAdapter.Companion.AllSegmentsVH>() {
+                         private val categoryInfo: HashMap<MediaType, HashSet<String>>,
+                         private val segmentClickListener: ((Double) -> Unit)? = null) : RecyclerView.Adapter<AllSegmentsAdapter.Companion.AllSegmentsVH>() {
 
     @Inject
     lateinit var pathUtils: PathUtils
@@ -36,9 +39,9 @@ class AllSegmentsAdapter(val allSegments: List<SegmentDetails>,
 
     companion object {
         class AllSegmentsVH(view: View) : RecyclerView.ViewHolder(view) {
-            val previewImage = view.findViewById<ImageView>(R.id.previewImage)
-            val moreLikeThis = view.findViewById<ImageView>(R.id.moreLikeThis)
-            val play = view.findViewById<ImageView>(R.id.play)
+            val previewImage: ImageView = view.findViewById(R.id.previewImage)
+            val moreLikeThis: ImageView = view.findViewById(R.id.moreLikeThis)
+            val play: ImageView = view.findViewById(R.id.play)
         }
     }
 
@@ -56,22 +59,18 @@ class AllSegmentsAdapter(val allSegments: List<SegmentDetails>,
 
     override fun onBindViewHolder(holder: AllSegmentsVH, position: Int) {
 
-        if (pathUtils.isThumbnailPathLocal() == true) {
-            pathUtils.getFileObjectForThumbnail(mediaType, objectId, allSegments[position].segmentId)?.let {
-                Picasso.get()
-                        .load(it)
-                        .fit()
-                        .centerCrop()
-                        .into(holder.previewImage)
-            }
-        } else if (pathUtils.isThumbnailPathLocal() == false) {
-            pathUtils.getThumbnailOfSegment(mediaType, objectId, allSegments[position].segmentId)?.let {
-                Picasso.get()
-                        .load(it)
-                        .fit()
-                        .centerCrop()
-                        .into(holder.previewImage)
-            }
+        if (pathUtils.isThumbnailPathLocal()) {
+            Picasso.get()
+                    .load(pathUtils.getFileObjectForThumbnail(mediaType, objectId, allSegments[position].segmentId))
+                    .fit()
+                    .centerCrop()
+                    .into(holder.previewImage)
+        } else {
+            Picasso.get()
+                    .load(pathUtils.getThumbnailOfSegment(mediaType, objectId, allSegments[position].segmentId))
+                    .fit()
+                    .centerCrop()
+                    .into(holder.previewImage)
         }
 
         holder.moreLikeThis.setOnClickListener {

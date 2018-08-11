@@ -11,7 +11,10 @@ import org.vitrivr.vitrivrapp.data.model.addmedia.ExtractionConfig
 import org.vitrivr.vitrivrapp.data.model.addmedia.ExtractionItem
 import org.vitrivr.vitrivrapp.features.addmedia.SelectedItemsAdapter.Companion.SelectedItemViewHolder
 
-class SelectedItemsAdapter(val config: ExtractionConfig) : RecyclerView.Adapter<SelectedItemViewHolder>() {
+/**
+ * Adapter for showing selected items
+ */
+class SelectedItemsAdapter(private val config: ExtractionConfig) : RecyclerView.Adapter<SelectedItemViewHolder>() {
 
     private val items = mutableListOf<ExtractionItem>()
 
@@ -21,7 +24,7 @@ class SelectedItemsAdapter(val config: ExtractionConfig) : RecyclerView.Adapter<
 
     companion object {
         class SelectedItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val itemName = view.findViewById<TextView>(R.id.itemName)
+            val itemName: TextView = view.findViewById(R.id.itemName)
         }
     }
 

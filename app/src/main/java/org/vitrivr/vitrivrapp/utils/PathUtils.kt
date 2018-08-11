@@ -8,21 +8,25 @@ import org.vitrivr.vitrivrapp.data.services.SettingsService
 import java.io.File
 import javax.inject.Inject
 
+/**
+ * Path Utility functions
+ */
 class PathUtils {
 
     @Inject
     lateinit var settingsService: SettingsService
+
+    init {
+        App.daggerAppComponent.inject(this)
+    }
 
     private val thumbnailsExtensions = hashMapOf(Pair(MediaType.IMAGE, "png"),
             Pair(MediaType.VIDEO, "png"),
             Pair(MediaType.AUDIO, "jpg"),
             Pair(MediaType.MODEL3D, "jpg"))
 
-    init {
-        App.daggerAppComponent.inject(this)
-    }
 
-    fun getObjectCompletePath(item: QueryResultPresenterModel): String? {
+    private fun getObjectCompletePath(item: QueryResultPresenterModel): String? {
         val prePath = settingsService.getResourcesSettings()?.objectsURL ?: return null
 
         return when (item.mediaType) {
@@ -75,11 +79,6 @@ class PathUtils {
         val prePath = settingsService.getResourcesSettings()?.thumbnailsURL
                 ?: throw IllegalStateException("Thumbnails URL not found")
         return prePath[0] == '/'
-    }
-
-    fun getFileOfObject(item: QueryResultPresenterModel): File? {
-        if (isObjectPathLocal() == null || isObjectPathLocal() == false) return null
-        return File(getObjectCompletePath(item))
     }
 
     fun getFileObjectForThumbnail(item: QueryResultPresenterModel): File {

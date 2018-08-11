@@ -11,13 +11,16 @@ import org.vitrivr.vitrivrapp.R
 import org.vitrivr.vitrivrapp.data.model.addmedia.ExtractionMetadata
 import org.vitrivr.vitrivrapp.features.addmedia.MetadataEditorAdapter.Companion.MetadataItemViewHolder
 
+/**
+ * Adapter for Metadata Editor recycler view
+ */
 class MetadataEditorAdapter(val metadata: ArrayList<ExtractionMetadata>) : RecyclerView.Adapter<MetadataItemViewHolder>() {
 
     companion object {
         class MetadataItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val domain = view.findViewById<TextInputEditText>(R.id.domain)
-            val key = view.findViewById<TextInputEditText>(R.id.key)
-            val value = view.findViewById<TextInputEditText>(R.id.value)
+            val domain: TextInputEditText = view.findViewById(R.id.domain)
+            val key: TextInputEditText = view.findViewById(R.id.key)
+            val value: TextInputEditText = view.findViewById(R.id.value)
         }
     }
 

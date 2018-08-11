@@ -1,5 +1,6 @@
 package org.vitrivr.vitrivrapp.features.resultdetails
 
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -36,21 +37,22 @@ class ImageResultDetailActivity : AppCompatActivity() {
 
     @Inject
     lateinit var pathUtils: PathUtils
-    val WRITE_REQUEST_CODE = 1
+    private val WRITE_REQUEST_CODE = 1
 
-    lateinit var presenterObject: QueryResultPresenterModel
-    lateinit var categoryInfo: HashMap<MediaType, HashSet<String>>
-    lateinit var featureInfoDialog: AlertDialog
-    lateinit var infoFileName: TextView
-    lateinit var infoFilePath: TextView
-    lateinit var infoObjectId: TextView
-    lateinit var infoMediaType: TextView
+    private lateinit var presenterObject: QueryResultPresenterModel
+    private lateinit var categoryInfo: HashMap<MediaType, HashSet<String>>
+    private lateinit var featureInfoDialog: AlertDialog
+    private lateinit var infoFileName: TextView
+    private lateinit var infoFilePath: TextView
+    private lateinit var infoObjectId: TextView
+    private lateinit var infoMediaType: TextView
     lateinit var allSegmentsRV: RecyclerView
 
     init {
         App.daggerAppComponent.inject(this)
     }
 
+    @SuppressLint("InflateParams")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         BigImageViewer.initialize(GlideImageLoader.with(applicationContext))

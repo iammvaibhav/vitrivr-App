@@ -12,7 +12,7 @@ import org.vitrivr.vitrivrapp.utils.PathUtils
 import javax.inject.Singleton
 
 @Module
-class AppModule(val applicationContext: Context) {
+class AppModule(private val applicationContext: Context) {
 
     @Singleton
     @Provides
@@ -32,7 +32,7 @@ class AppModule(val applicationContext: Context) {
 
     @Singleton
     @Provides
-    fun provideSettingsSerivce() = SettingsService()
+    fun provideSettingsService() = SettingsService()
 
     @Singleton
     @Provides

@@ -13,7 +13,6 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
-import android.util.Log
 import android.widget.Toast
 import com.google.gson.Gson
 import droidninja.filepicker.FilePickerBuilder
@@ -21,7 +20,6 @@ import droidninja.filepicker.FilePickerConst
 import kotlinx.android.synthetic.main.add_media_activity.*
 import net.gotev.uploadservice.MultipartUploadRequest
 import net.gotev.uploadservice.UploadNotificationConfig
-import org.json.JSONObject
 import org.vitrivr.vitrivrapp.App
 import org.vitrivr.vitrivrapp.R
 import org.vitrivr.vitrivrapp.components.results.EqualSpacingItemDecoration
@@ -35,18 +33,22 @@ import java.io.File
 import java.io.FileWriter
 import javax.inject.Inject
 
+@Suppress("PrivatePropertyName", "NestedLambdaShadowedImplicitParameter")
+/**
+ * Add media activity used to upload and extract new media files to cineast server
+ */
 class AddMediaActivity : AppCompatActivity() {
 
-    val IMAGE_REQUEST_CODE = 1
-    val VIDEO_REQUEST_CODE = 2
-    val AUDIO_REQUEST_CODE = 3
-    val MODEL3D_REQUEST_CODE = 4
+    private val IMAGE_REQUEST_CODE = 1
+    private val VIDEO_REQUEST_CODE = 2
+    private val AUDIO_REQUEST_CODE = 3
+    private val MODEL3D_REQUEST_CODE = 4
 
-    val READ_EXTERNAL_REQUEST_CODE = 100
+    private val READ_EXTERNAL_REQUEST_CODE = 100
 
-    val EXTRACTION_CONFIG_KEY = "EXTRACTION_CONFIG_KEY"
-    val MEDIA_TYPE_KEY = "MEDIA_TYPE_KEY"
-    val PATHS_KEY = "PATHS_KEY"
+    private val EXTRACTION_CONFIG_KEY = "EXTRACTION_CONFIG_KEY"
+    private val MEDIA_TYPE_KEY = "MEDIA_TYPE_KEY"
+    private val PATHS_KEY = "PATHS_KEY"
 
     var extractionConfig = ExtractionConfig()
     var mediaType: MediaType? = null
@@ -62,21 +64,31 @@ class AddMediaActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.add_media_activity)
+
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.navigationIcon?.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP)
 
+        /**
+         * restore state
+         */
         if (savedInstanceState != null) {
             extractionConfig = savedInstanceState.getParcelable(EXTRACTION_CONFIG_KEY)
             mediaType = savedInstanceState.getSerializable(MEDIA_TYPE_KEY) as MediaType
             paths = savedInstanceState.getStringArrayList(PATHS_KEY)
         }
 
+        /**
+         * setup recycler view
+         */
         itemsRecyclerView.layoutManager = LinearLayoutManager(this)
         itemsRecyclerView.adapter = SelectedItemsAdapter(extractionConfig)
         itemsRecyclerView.addItemDecoration(EqualSpacingItemDecoration(6.px))
 
+        /**
+         * delete item on swipe
+         */
         val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
             override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
                 return false
@@ -90,7 +102,9 @@ class AddMediaActivity : AppCompatActivity() {
             }
         }
 
-        // attaching the touch helper to recycler view
+        /**
+         * attaching the touch helper to recycler view
+         */
         ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(itemsRecyclerView)
 
         if (mediaType != null) {
@@ -126,8 +140,6 @@ class AddMediaActivity : AppCompatActivity() {
             val serverSettings = settingsService.getCineastAPISettings()
             if (serverSettings != null) {
                 val uploadAddress = "http://${serverSettings.address}:${serverSettings.port}/api/v1/extractFiles"
-                Log.e("config", JSONObject(Gson().toJson(extractionConfig)).toString(4))
-                Log.e("paths", paths.toString())
 
                 val configFile = File(filesDir, "extract_config.json")
                 val output = FileWriter(configFile)
@@ -152,7 +164,7 @@ class AddMediaActivity : AppCompatActivity() {
                     finish()
 
                 } catch (e: Exception) {
-                    Log.e("AndroidUploadService", e.message, e)
+                    e.printStackTrace()
                 }
             } else {
                 Toast.makeText(this, "Server Settings not found. Please configure it first.", Toast.LENGTH_SHORT).show()
