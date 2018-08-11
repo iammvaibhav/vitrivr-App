@@ -15,22 +15,35 @@ import org.vitrivr.vitrivrapp.data.model.results.QueryResultPresenterModel
 import org.vitrivr.vitrivrapp.features.resultdetails.ImageResultDetailActivity
 import org.vitrivr.vitrivrapp.features.resultdetails.Model3DResultDetailActivity
 import org.vitrivr.vitrivrapp.features.resultdetails.VideoResultDetailActivity
+import org.vitrivr.vitrivrapp.features.results.ResultsActivity.Companion.CATEGORY_INFO
+import org.vitrivr.vitrivrapp.features.results.ResultsActivity.Companion.PRESENTER_OBJECT
+import org.vitrivr.vitrivrapp.utils.PathUtils
 import javax.inject.Inject
 
-class ViewSmallAdapter(initItemsList: List<QueryResultPresenterModel>, val resultsViewModel: ResultsViewModel) : RecyclerView.Adapter<ViewSmallAdapter.Companion.ViewSmallVH>() {
+/**
+ * ViewSmallAdapter is a RecyclerView Adapter which is used to show result items (only preview) without the details.
+ * resultsViewModel is used for accessing category count
+ */
+class ViewSmallAdapter(private val resultsViewModel: ResultsViewModel) : RecyclerView.Adapter<ViewSmallAdapter.Companion.ViewSmallVH>(), SwapAdapter {
 
     @Inject
     lateinit var pathUtils: PathUtils
+
+    /**
+     * holds current result of items known to this adapter
+     */
     private val items = mutableListOf<QueryResultPresenterModel>()
 
     init {
         App.daggerAppComponent.inject(this)
-        items.addAll(initItemsList.filter { it.visibility })
     }
 
     companion object {
+        /**
+         * ViewHolder class for this adapter
+         */
         class ViewSmallVH(view: View) : RecyclerView.ViewHolder(view) {
-            val previewThumbnail = view.findViewById<ImageView>(R.id.previewImage)
+            val previewThumbnail: ImageView = view.findViewById(R.id.previewImage)
         }
     }
 
@@ -42,22 +55,24 @@ class ViewSmallAdapter(initItemsList: List<QueryResultPresenterModel>, val resul
     override fun getItemCount() = items.size
 
     override fun onBindViewHolder(holder: ViewSmallVH, position: Int) {
-        if (pathUtils.isThumbnailPathLocal() == true) {
-            pathUtils.getFileOfThumbnail(items[position])?.let {
-                Picasso.get()
-                        .load(it)
-                        .fit()
-                        .centerCrop()
-                        .into(holder.previewThumbnail)
-            }
-        } else if (pathUtils.isThumbnailPathLocal() == false) {
-            pathUtils.getThumbnailCompletePath(items[position])?.let {
-                Picasso.get()
-                        .load(it)
-                        .fit()
-                        .centerCrop()
-                        .into(holder.previewThumbnail)
-            }
+        if (pathUtils.isThumbnailPathLocal()) {
+            /**
+             * Thumbnails stored locally.
+             */
+            Picasso.get()
+                    .load(pathUtils.getFileObjectForThumbnail(items[position]))
+                    .fit()
+                    .centerCrop()
+                    .into(holder.previewThumbnail)
+        } else {
+            /**
+             * Thumbnails to be fetched from Network.
+             */
+            Picasso.get()
+                    .load(pathUtils.getThumbnailCompletePath(items[position]))
+                    .fit()
+                    .centerCrop()
+                    .into(holder.previewThumbnail)
         }
 
         val openDetailsListener = View.OnClickListener {
@@ -68,15 +83,22 @@ class ViewSmallAdapter(initItemsList: List<QueryResultPresenterModel>, val resul
                 MediaType.MODEL3D -> Intent(holder.itemView.context, Model3DResultDetailActivity::class.java)
             }
 
-            intent.putExtra(ViewDetailsAdapter.PRESENTER_OBJECT, items[position])
-            intent.putExtra(ViewDetailsAdapter.CATEGORY_INFO, resultsViewModel.categoryCount)
+            intent.putExtra(PRESENTER_OBJECT, items[position])
+            intent.putExtra(CATEGORY_INFO, resultsViewModel.categoryCount)
             holder.itemView.context.startActivity(intent)
         }
 
+        /**
+         * open the appropriate details activity according to the media type
+         */
         holder.previewThumbnail.setOnClickListener(openDetailsListener)
     }
 
-    fun swap(items: List<QueryResultPresenterModel>) {
+    /**
+     * swap the current result list with the list provided
+     * @param items list of new results
+     */
+    override fun swap(items: List<QueryResultPresenterModel>) {
         val itemsToTake = items.filter { it.visibility }
         val diffCallback = GradualQueryResultsCallback(this.items, itemsToTake)
         val diffResult = DiffUtil.calculateDiff(diffCallback)

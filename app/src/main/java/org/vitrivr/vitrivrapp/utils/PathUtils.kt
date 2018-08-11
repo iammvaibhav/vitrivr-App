@@ -1,4 +1,4 @@
-package org.vitrivr.vitrivrapp.features.results
+package org.vitrivr.vitrivrapp.utils
 
 import android.net.Uri
 import org.vitrivr.vitrivrapp.App
@@ -71,8 +71,9 @@ class PathUtils {
         return prePath[0] == '/'
     }
 
-    fun isThumbnailPathLocal(): Boolean? {
-        val prePath = settingsService.getResourcesSettings()?.thumbnailsURL ?: return null
+    fun isThumbnailPathLocal(): Boolean {
+        val prePath = settingsService.getResourcesSettings()?.thumbnailsURL
+                ?: throw IllegalStateException("Thumbnails URL not found")
         return prePath[0] == '/'
     }
 
@@ -81,13 +82,12 @@ class PathUtils {
         return File(getObjectCompletePath(item))
     }
 
-    fun getFileOfThumbnail(item: QueryResultPresenterModel): File? {
-        if (isThumbnailPathLocal() == null || isThumbnailPathLocal() == false) return null
-        return File(getThumbnailCompletePath(item))
+    fun getFileObjectForThumbnail(item: QueryResultPresenterModel): File {
+        return getFileObjectForThumbnail(item.mediaType, item.objectId, item.segmentDetail.segmentId)
     }
 
-    fun getFileOfThumbnail(mediaType: MediaType, objectId: String, segmentId: String): File? {
-        if (isThumbnailPathLocal() == null || isThumbnailPathLocal() == false) return null
+    fun getFileObjectForThumbnail(mediaType: MediaType, objectId: String, segmentId: String): File {
+        if (!isThumbnailPathLocal()) throw IllegalStateException("Thumbnails URL is not Local")
         return File(getThumbnailOfSegment(mediaType, objectId, segmentId))
     }
 

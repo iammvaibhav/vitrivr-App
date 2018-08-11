@@ -29,8 +29,9 @@ import org.vitrivr.vitrivrapp.R
 import org.vitrivr.vitrivrapp.components.results.EqualSpacingItemDecoration
 import org.vitrivr.vitrivrapp.data.model.enums.MediaType
 import org.vitrivr.vitrivrapp.data.model.results.QueryResultPresenterModel
-import org.vitrivr.vitrivrapp.features.results.PathUtils
-import org.vitrivr.vitrivrapp.features.results.ViewDetailsAdapter
+import org.vitrivr.vitrivrapp.features.results.ResultsActivity.Companion.CATEGORY_INFO
+import org.vitrivr.vitrivrapp.features.results.ResultsActivity.Companion.PRESENTER_OBJECT
+import org.vitrivr.vitrivrapp.utils.PathUtils
 import org.vitrivr.vitrivrapp.utils.px
 import javax.inject.Inject
 
@@ -76,11 +77,11 @@ class VideoResultDetailActivity : AppCompatActivity() {
         setContentView(R.layout.video_result_detail_activity)
 
         if (savedInstanceState == null) {
-            presenterObject = intent.getParcelableExtra(ViewDetailsAdapter.PRESENTER_OBJECT)
-            categoryInfo = intent.getSerializableExtra(ViewDetailsAdapter.CATEGORY_INFO) as HashMap<MediaType, HashSet<String>>
+            presenterObject = intent.getParcelableExtra(PRESENTER_OBJECT)
+            categoryInfo = intent.getSerializableExtra(CATEGORY_INFO) as HashMap<MediaType, HashSet<String>>
         } else {
-            presenterObject = savedInstanceState.getParcelable(ViewDetailsAdapter.PRESENTER_OBJECT)
-            categoryInfo = savedInstanceState.getSerializable(ViewDetailsAdapter.CATEGORY_INFO) as HashMap<MediaType, HashSet<String>>
+            presenterObject = savedInstanceState.getParcelable(PRESENTER_OBJECT)
+            categoryInfo = savedInstanceState.getSerializable(CATEGORY_INFO) as HashMap<MediaType, HashSet<String>>
             currentWindow = savedInstanceState.getInt(CURRENT_WINDOW)
             playbackPosition = savedInstanceState.getLong(PLAYBACK_POSITION)
             playWhenReady = savedInstanceState.getBoolean(PLAY_WHEN_READY)
@@ -185,8 +186,8 @@ class VideoResultDetailActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
 
         outState?.let {
-            outState.putParcelable(ViewDetailsAdapter.PRESENTER_OBJECT, presenterObject)
-            outState.putSerializable(ViewDetailsAdapter.CATEGORY_INFO, categoryInfo)
+            outState.putParcelable(PRESENTER_OBJECT, presenterObject)
+            outState.putSerializable(CATEGORY_INFO, categoryInfo)
             outState.putInt(CURRENT_WINDOW, currentWindow)
             outState.putLong(PLAYBACK_POSITION, playbackPosition)
             outState.putBoolean(PLAY_WHEN_READY, playWhenReady)

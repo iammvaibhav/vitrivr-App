@@ -25,9 +25,9 @@ import org.vitrivr.vitrivrapp.R
 import org.vitrivr.vitrivrapp.components.results.EqualSpacingItemDecoration
 import org.vitrivr.vitrivrapp.data.model.enums.MediaType
 import org.vitrivr.vitrivrapp.data.model.results.QueryResultPresenterModel
-import org.vitrivr.vitrivrapp.features.results.PathUtils
-import org.vitrivr.vitrivrapp.features.results.ViewDetailsAdapter.Companion.CATEGORY_INFO
-import org.vitrivr.vitrivrapp.features.results.ViewDetailsAdapter.Companion.PRESENTER_OBJECT
+import org.vitrivr.vitrivrapp.features.results.ResultsActivity.Companion.CATEGORY_INFO
+import org.vitrivr.vitrivrapp.features.results.ResultsActivity.Companion.PRESENTER_OBJECT
+import org.vitrivr.vitrivrapp.utils.PathUtils
 import org.vitrivr.vitrivrapp.utils.px
 import javax.inject.Inject
 

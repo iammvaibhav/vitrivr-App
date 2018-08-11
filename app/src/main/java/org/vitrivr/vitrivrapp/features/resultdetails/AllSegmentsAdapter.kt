@@ -14,9 +14,9 @@ import org.vitrivr.vitrivrapp.data.model.enums.MediaType
 import org.vitrivr.vitrivrapp.data.model.enums.MessageType
 import org.vitrivr.vitrivrapp.data.model.query.MoreLikeThisQueryModel
 import org.vitrivr.vitrivrapp.data.model.results.SegmentDetails
-import org.vitrivr.vitrivrapp.features.results.PathUtils
 import org.vitrivr.vitrivrapp.features.results.ResultsActivity
 import org.vitrivr.vitrivrapp.features.results.ResultsActivity.Companion.QUERY_TYPE
+import org.vitrivr.vitrivrapp.utils.PathUtils
 import javax.inject.Inject
 
 class AllSegmentsAdapter(val allSegments: List<SegmentDetails>,
@@ -57,7 +57,7 @@ class AllSegmentsAdapter(val allSegments: List<SegmentDetails>,
     override fun onBindViewHolder(holder: AllSegmentsVH, position: Int) {
 
         if (pathUtils.isThumbnailPathLocal() == true) {
-            pathUtils.getFileOfThumbnail(mediaType, objectId, allSegments[position].segmentId)?.let {
+            pathUtils.getFileObjectForThumbnail(mediaType, objectId, allSegments[position].segmentId)?.let {
                 Picasso.get()
                         .load(it)
                         .fit()

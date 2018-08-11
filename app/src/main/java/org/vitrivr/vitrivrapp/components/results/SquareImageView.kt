@@ -4,6 +4,9 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.ImageView
 
+/**
+ * An ImageView with constraint that the height will always be equal to its width
+ */
 class SquareImageView @JvmOverloads constructor(context: Context,
                                                 attrs: AttributeSet? = null,
                                                 defStyleAttr: Int = 0,

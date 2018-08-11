@@ -8,7 +8,7 @@ import okhttp3.OkHttpClient
 import org.vitrivr.vitrivrapp.data.repository.QueryRepository
 import org.vitrivr.vitrivrapp.data.repository.QueryResultsRepository
 import org.vitrivr.vitrivrapp.data.services.SettingsService
-import org.vitrivr.vitrivrapp.features.results.PathUtils
+import org.vitrivr.vitrivrapp.utils.PathUtils
 import javax.inject.Singleton
 
 @Module

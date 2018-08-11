@@ -8,14 +8,24 @@ import android.widget.SeekBar
 import android.widget.TextView
 import org.vitrivr.vitrivrapp.R
 
+/**
+ * This weight adjustment adapter is used in the query refinement drawer to adjust the weights of different categories
+ * categoryWeight stores the category and its set weight by the user.
+ */
 class WeightAdjustmentAdapter(val categoryWeight: HashMap<String, Double>) : RecyclerView.Adapter<WeightAdjustmentAdapter.WeightAdjustmentViewHolder>() {
 
+    /**
+     * Corresponding view holder
+     */
     class WeightAdjustmentViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val category = view.findViewById<TextView>(R.id.category)
-        val weight = view.findViewById<TextView>(R.id.weight)
-        val weightAdjustment = view.findViewById<SeekBar>(R.id.weightAdjustment)
+        val category: TextView = view.findViewById(R.id.category)
+        val weight: TextView = view.findViewById(R.id.weight)
+        val weightAdjustment: SeekBar = view.findViewById(R.id.weightAdjustment)
     }
 
+    /**
+     * list of all the categories
+     */
     private val categoryList = categoryWeight.keys.toList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WeightAdjustmentViewHolder {

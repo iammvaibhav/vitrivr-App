@@ -7,6 +7,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
 import org.vitrivr.vitrivrapp.App
+import java.lang.reflect.Type
 import javax.inject.Inject
 
 /**
@@ -94,6 +95,23 @@ class SharedPreferenceHelper(prefName: String) {
         return try {
             val json = getString(key)
             gson.fromJson<T>(json, classOfT)
+        } catch (e: ClassCastException) {
+            null
+        } catch (e: JsonSyntaxException) {
+            null
+        }
+    }
+
+    /**
+     * gets an object with given key
+     * @param key key of the object
+     * @param type type of the object
+     * @return if the given key exists, returns the object with the given key else returns null
+     */
+    fun <T> getObject(key: String, type: Type): T? {
+        return try {
+            val json = getString(key)
+            gson.fromJson<T>(json, type)
         } catch (e: ClassCastException) {
             null
         } catch (e: JsonSyntaxException) {

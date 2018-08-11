@@ -10,11 +10,12 @@ import org.vitrivr.vitrivrapp.features.resultdetails.AllSegmentsAdapter
 import org.vitrivr.vitrivrapp.features.resultdetails.ImageResultDetailActivity
 import org.vitrivr.vitrivrapp.features.resultdetails.Model3DResultDetailActivity
 import org.vitrivr.vitrivrapp.features.resultdetails.VideoResultDetailActivity
-import org.vitrivr.vitrivrapp.features.results.PathUtils
 import org.vitrivr.vitrivrapp.features.results.ResultsViewModel
+import org.vitrivr.vitrivrapp.features.results.SwapAdapter
 import org.vitrivr.vitrivrapp.features.results.ViewDetailsAdapter
 import org.vitrivr.vitrivrapp.features.results.ViewSmallAdapter
 import org.vitrivr.vitrivrapp.features.settings.SettingsViewModel
+import org.vitrivr.vitrivrapp.utils.PathUtils
 import javax.inject.Singleton
 
 @Singleton
@@ -35,5 +36,6 @@ interface AppComponent {
     fun inject(videoResultDetailActivity: VideoResultDetailActivity)
     fun inject(model3DResultDetailActivity: Model3DResultDetailActivity)
     fun inject(addMediaActivity: AddMediaActivity)
+    fun inject(swapAdapter: SwapAdapter)
 
 }

@@ -5,6 +5,12 @@ import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.View
 
+/**
+ * Item decoration for RecyclerView to add equal spacing between items.
+ *
+ * spacing: spacing to add between items in px
+ * displayMode: can be from VERTICAL, HORIZONTAL & GRID
+ */
 class EqualSpacingItemDecoration @JvmOverloads constructor(private val spacing: Int, private var displayMode: Int = -1) : RecyclerView.ItemDecoration() {
 
     override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State?) {
