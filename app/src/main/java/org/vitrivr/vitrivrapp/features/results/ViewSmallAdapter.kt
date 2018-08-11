@@ -104,7 +104,7 @@ class ViewSmallAdapter(private val resultsViewModel: ResultsViewModel) : Recycle
         val diffResult = DiffUtil.calculateDiff(diffCallback)
 
         this.items.clear()
-        this.items.addAll(items)
+        this.items.addAll(itemsToTake)
         diffResult.dispatchUpdatesTo(this)
     }
 }
