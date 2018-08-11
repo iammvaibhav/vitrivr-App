@@ -357,6 +357,13 @@ class QueryActivity : AppCompatActivity() {
          */
         toggleTerm.setOnCheckedChangeListener(null)
         toggleTerm.isChecked = true
+
+        QueryTermType.values().forEach { bottomSheetToggles.setChecked(it, false) }
+        queryViewModel.query.containers.find { it.id == queryViewModel.currContainerID }?.let {
+            it.terms.forEach {
+                bottomSheetToggles.setChecked(it.type, true)
+            }
+        }
         bottomSheetToggles.setChecked(type, true)
         toggleTerm.setOnCheckedChangeListener(enableTermListener)
 
