@@ -56,3 +56,7 @@ The whole project is divided into five top level packages:
   |:---:|:---:|:---:|
   | <img src="https://image.ibb.co/i5DvOo/Screenshot_20180730_153741.png" width="230px"/> | <img src="https://image.ibb.co/nesN3o/Screenshot_20180730_153807.png" width="230px"/> | <img src="https://image.ibb.co/bTqLpT/Screenshot_20180730_153817.png" width="230px"/>
   | <img src="https://image.ibb.co/dFA9io/Screenshot_20180730_153822.png" width="230px"/> | <img src="https://image.ibb.co/gwR4G8/Screenshot_20180730_154124.png" width="230px"/> | <img src="https://image.ibb.co/htmh3o/Screenshot_20180730_154148.png" width="230px"/>
+
+## See it in action
+
+[![Demo of vitrivr App](https://image.ibb.co/c33T39/video_Youtube.png)](https://youtu.be/yYAVT22My9w "Demo of vitrivr App")
