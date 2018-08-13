@@ -17,6 +17,10 @@ Cineast API Documentation can be found [here](https://github.com/iammvaibhav/Cin
 * Documentation of Cineast API (both REST and WebSocket)
 * Preliminary work on 'Add Media API' for cineast with UI for Android.
 
+## See it in action
+
+[![Demo of vitrivr App](https://image.ibb.co/c33T39/video_Youtube.png)](https://youtu.be/yYAVT22My9w "Demo of vitrivr App")
+
 ## What's left
 * Making 'Add Media API' more functional, robust and secure.
 * 3D Model queries currently use WebView for using three.js library's geometry to JSON conversion algorithm. Implementing the required functionality in native platform to increase efficiency.
@@ -56,7 +60,3 @@ The whole project is divided into five top level packages:
   |:---:|:---:|:---:|
   | <img src="https://image.ibb.co/i5DvOo/Screenshot_20180730_153741.png" width="230px"/> | <img src="https://image.ibb.co/nesN3o/Screenshot_20180730_153807.png" width="230px"/> | <img src="https://image.ibb.co/bTqLpT/Screenshot_20180730_153817.png" width="230px"/>
   | <img src="https://image.ibb.co/dFA9io/Screenshot_20180730_153822.png" width="230px"/> | <img src="https://image.ibb.co/gwR4G8/Screenshot_20180730_154124.png" width="230px"/> | <img src="https://image.ibb.co/htmh3o/Screenshot_20180730_154148.png" width="230px"/>
-
-## See it in action
-
-[![Demo of vitrivr App](https://image.ibb.co/c33T39/video_Youtube.png)](https://youtu.be/yYAVT22My9w "Demo of vitrivr App")
